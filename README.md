@@ -61,4 +61,36 @@ These enhancements are part of the planned system evolution:
 ---
 
 ## 🧱 Architecture Concept
+EverCRM
+│
+├── Public Area
+│ ├── Landing Page
+│ ├── Login & Registration
+│ └── Password Reset
+│
+├── Property Management Module
+├── Tenant Management Module
+├── Lease Management Module
+├── Payment Tracking Module
+├── Maintenance Requests Module
+│
+└── Tenant Portal
 
+This modular architecture supports future SaaS multi-tenant scaling.
+
+---
+
+## 🚀 Deployment Instructions
+
+### Install
+```bash
+npm install
+Development server
+bash
+Copy code
+npm run dev
+Build for production
+bash
+Copy code
+npm run build
+npm run preview
