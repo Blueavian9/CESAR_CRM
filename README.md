@@ -1,96 +1,73 @@
-# EverCRM
+# React + TypeScript + Vite
 
-> Enterprise-ready property management CRM for managing properties, tenants, leases, payments, and maintenance workflows. Includes secure tenant access and is built for future automation, analytics, and integrated screening systems.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
----
+Currently, two official plugins are available:
 
-## 🌟 Overview
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-EverCRM is a modern property management system designed to streamline operations for landlords, real estate operators, and property management teams. The platform centralizes the entire lifecycle of rental assets—from property onboarding to lease administration, rent collection, and maintenance requests.
+## React Compiler
 
-This product is owned by **Ever Hernandez** and created/designed by **Cesar A. Aguilar** as an enterprise SaaS-grade application with future scalability in mind.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
----
+## Expanding the ESLint configuration
 
-## 🏗 Core Features (MVP)
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-### For Property Managers
-✔ User authentication & secure access  
-✔ Create and manage properties  
-✔ Add units per property (beds, baths, square footage, rent price, status)  
-✔ Track active tenants  
-✔ Create and track leases  
-✔ Record rent payments  
-✔ Manage and categorize maintenance requests  
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### For Tenants (Portal)
-✔ Secure login  
-✔ Submit maintenance requests  
-✔ View request status  
-✔ View lease information  
-✔ Access payment history  
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
----
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
-## 📌 Future Roadmap
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-These enhancements are part of the planned system evolution:
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-🔹 Automated rent reminders  
-🔹 Online payment gateway integration  
-🔹 Tenant screening workflows  
-🔹 Dynamic reporting and KPIs  
-🔹 Custom document generation  
-🔹 Role-based permissions  
-🔹 Multi-property portfolio analytics  
-🔹 Data export (CSV, XLSX, PDF)  
-
----
-
-## 🛠 Technology Stack
-
-| Layer | Technology |
-|--------|------------|
-| Frontend UI | React 18 + TypeScript + Tailwind CSS |
-| Routing | React Router |
-| Icons | Lucide Icons |
-| State/Data | REST API or Bolt Database Integration |
-| Data Security | Row Level Security (RLS) |
-| Deploy Options | Vercel / Netlify / Render |
-
----
-
-## 🧱 Architecture Concept
-EverCRM
-│
-├── Public Area
-│ ├── Landing Page
-│ ├── Login & Registration
-│ └── Password Reset
-│
-├── Property Management Module
-├── Tenant Management Module
-├── Lease Management Module
-├── Payment Tracking Module
-├── Maintenance Requests Module
-│
-└── Tenant Portal
-
-This modular architecture supports future SaaS multi-tenant scaling.
-
----
-
-## 🚀 Deployment Instructions
-
-### Install
-```bash
-npm install
-Development server
-bash
-Copy code
-npm run dev
-Build for production
-bash
-Copy code
-npm run build
-npm run preview
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
