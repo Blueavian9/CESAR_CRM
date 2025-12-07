@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/ui/Sidebar";
 import Topbar from "../../components/ui/Topbar";
 
