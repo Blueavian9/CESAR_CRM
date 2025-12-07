@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Simple global reset */
+/* simple global reset */
 body {
   @apply bg-slate-100 text-slate-900 antialiased;
 }
