@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* simple global reset */
+:root {
+  color-scheme: light;
+}
+
 body {
   @apply bg-slate-100 text-slate-900 antialiased;
 }
