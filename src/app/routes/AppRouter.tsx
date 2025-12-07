@@ -10,16 +10,20 @@ import MaintenancePage from "../../features/maintenance/MaintenancePage";
 const AppRouter = () => {
   return (
     <Routes>
-      {/* All authenticated routes share the main layout */}
-      <Route element={<Layout />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/properties" element={<PropertiesPage />} />
-        <Route path="/tenants" element={<TenantsPage />} />
-        <Route path="/leases" element={<LeasesPage />} />
-        <Route path="/payments" element={<PaymentsPage />} />
-        <Route path="/maintenance" element={<MaintenancePage />} />
-        {/* Default redirect */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Root layout for all authenticated routes */}
+      <Route path="/" element={<Layout />}>
+        {/* When user hits "/", send them to /dashboard */}
+        <Route index element={<Navigate to="dashboard" replace />} />
+
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="properties" element={<PropertiesPage />} />
+        <Route path="tenants" element={<TenantsPage />} />
+        <Route path="leases" element={<LeasesPage />} />
+        <Route path="payments" element={<PaymentsPage />} />
+        <Route path="maintenance" element={<MaintenancePage />} />
+
+        {/* Fallback for unknown routes */}
+        <Route path="*" element={<Navigate to="dashboard" replace />} />
       </Route>
     </Routes>
   );
