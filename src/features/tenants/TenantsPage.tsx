@@ -1,3 +1,4 @@
+// src/features/tenants/TenantsPage.tsx
 const TenantsPage = () => {
   return (
     <div>
