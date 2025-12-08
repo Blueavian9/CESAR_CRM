@@ -1,5 +1,7 @@
 import type { FC } from "react";
 import { MOCK_TENANTS } from "./mockTenants.ts";
+import type { FC } from "react"; 
+
 
 const TenantsPage: FC = () => {
   const totalTenants = MOCK_TENANTS.length;
@@ -102,12 +104,15 @@ const TenantsPage: FC = () => {
                     </span>
                   </td>
                   <td className="px-4 py-2 align-middle text-right">
-                    <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
-                      View profile
-                    </button>
-                  </td>
+  <Link
+    to={`/tenants/${tenant.id}`}
+    className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+  >
+    View details
+  </Link>
+</td>
+
                 </tr>
-              ))}
             </tbody>
           </table>
         </div>
