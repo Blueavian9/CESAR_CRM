@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { MOCK_PAYMENTS } from "./mockPayments.ts";
+import { Link } from "react-router-dom";
 
 const PaymentsPage: FC = () => {
   const collected = MOCK_PAYMENTS.filter((p) => p.status === "completed").reduce(
@@ -68,50 +69,53 @@ const PaymentsPage: FC = () => {
                 <th className="px-4 py-2 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {MOCK_PAYMENTS.map((p) => (
-                <tr
-                  key={p.id}
-                  className="border-b last:border-0 hover:bg-slate-50/60"
-                >
-                  <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
-                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                    {p.tenantName}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {p.propertyName}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    ${p.amount.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2">
-                    <span
-                      className={[
-                        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                        p.status === "completed" &&
-                          "bg-emerald-50 text-emerald-700 border border-emerald-100",
-                        p.status === "pending" &&
-                          "bg-amber-50 text-amber-700 border border-amber-100",
-                        p.status === "failed" &&
-                          "bg-rose-50 text-rose-700 border border-rose-100",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      {p.status === "completed" && "Completed"}
-                      {p.status === "pending" && "Pending"}
-                      {p.status === "failed" && "Failed"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
-                      View receipt
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+          <tbody>
+  {MOCK_PAYMENTS.map((p) => (
+    <tr
+      key={p.id}
+      className="border-b last:border-0 hover:bg-slate-50/60"
+    >
+      <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
+      <td className="px-4 py-2 text-sm font-medium text-slate-900">
+        {p.tenantName}
+      </td>
+      <td className="px-4 py-2 text-sm text-slate-600">
+        {p.propertyName}
+      </td>
+      <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
+      <td className="px-4 py-2 text-sm text-slate-600">
+        ${p.amount.toLocaleString()}
+      </td>
+      <td className="px-4 py-2">
+        <span
+          className={[
+            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+            p.status === "completed" &&
+              "bg-emerald-50 text-emerald-700 border border-emerald-100",
+            p.status === "pending" &&
+              "bg-amber-50 text-amber-700 border border-amber-100",
+            p.status === "failed" &&
+              "bg-rose-50 text-rose-700 border border-rose-100",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {p.status === "completed" && "Completed"}
+          {p.status === "pending" && "Pending"}
+          {p.status === "failed" && "Failed"}
+        </span>
+      </td>
+      <td className="px-4 py-2 align-middle text-right">
+        <Link
+          to={`/payments/${p.id}`}
+          className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+        >
+          View details
+        </Link>
+      </td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
       </div>

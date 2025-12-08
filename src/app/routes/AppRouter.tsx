@@ -9,36 +9,40 @@ import MaintenancePage from "../../features/maintenance/MaintenancePage";
 import PropertyDetailsPage from "../../features/properties/PropertyDetailsPage";
 import TenantDetailsPage from "../../features/tenants/TenantDetailsPage";
 import LeaseDetailsPage from "../../features/leases/LeaseDetailsPage";
+import PaymentDetailsPage from "../../features/payments/PaymentDetailsPage";
 
 const AppRouter = () => {
   return (
-    <Routes>
-      {/* Root layout for all authenticated routes */}
-      <Route path="/" element={<Layout />}>
+  <Routes>
+          <Route path="/" element={<Layout />}>
         {/* When user hits "/", send them to /dashboard */}
         <Route index element={<Navigate to="dashboard" replace />} />
 
         <Route path="dashboard" element={<DashboardPage />} />
+
+        {/* Properties */}
         <Route path="properties" element={<PropertiesPage />} />
-        <Route path="/properties" element={<PropertiesPage />} />
-<Route path="/properties/:id" element={<PropertyDetailsPage />} />
+        <Route path="properties/:id" element={<PropertyDetailsPage />} />
 
+        {/* Tenants */}
         <Route path="tenants" element={<TenantsPage />} />
-        <Route path="/tenants" element={<TenantsPage />} />
-<Route path="/tenants/:id" element={<TenantDetailsPage />} />
+        <Route path="tenants/:id" element={<TenantDetailsPage />} />
 
+        {/* Leases */}
         <Route path="leases" element={<LeasesPage />} />
-        <Route path="leases" element={<LeasesPage />} />
-<Route path="/leases" element={<LeasesPage />} />
-<Route path="/leases/:id" element={<LeaseDetailsPage />} />
+        <Route path="leases/:id" element={<LeaseDetailsPage />} />
 
+        {/* Payments */}
         <Route path="payments" element={<PaymentsPage />} />
+        <Route path="payments/:id" element={<PaymentDetailsPage />} />
+
+        {/* Maintenance */}
         <Route path="maintenance" element={<MaintenancePage />} />
 
         {/* Fallback for unknown routes */}
         <Route path="*" element={<Navigate to="dashboard" replace />} />
       </Route>
-    </Routes>
+</Routes>
   );
 };
 
