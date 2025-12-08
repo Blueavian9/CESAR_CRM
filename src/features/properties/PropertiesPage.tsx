@@ -1,6 +1,8 @@
 import { type FC, useState } from "react";
 import { MOCK_PROPERTIES } from "./mockProperties";
 import { useSearch } from "../../app/context/SearchContext";
+import { Link } from "react-router-dom";
+
 
 type SortKey = "name" | "city" | "type" | "units" | "vacant" | "status";
 type SortDir = "asc" | "desc";
@@ -318,10 +320,14 @@ const PropertiesPage: FC = () => {
                       </span>
                     </td>
                     <td className="px-4 py-2 align-middle text-right">
-                      <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
-                        View details
-                      </button>
-                    </td>
+  <Link
+    to={`/properties/${property.id}`}
+    className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+  >
+    View details
+  </Link>
+</td>
+
                   </tr>
                 );
               })}
