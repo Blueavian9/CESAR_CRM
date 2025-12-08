@@ -1,12 +1,15 @@
 import type { FC } from "react";
-import { MOCK_TENANTS } from "./mockTenants.ts";
-import type { FC } from "react"; 
-
+import { Link } from "react-router-dom";
+import { MOCK_TENANTS } from "./mockTenants";
 
 const TenantsPage: FC = () => {
   const totalTenants = MOCK_TENANTS.length;
-  const pastDueCount = MOCK_TENANTS.filter((t) => t.status === "past_due").length;
-  const noticeCount = MOCK_TENANTS.filter((t) => t.status === "notice").length;
+  const pastDueCount = MOCK_TENANTS.filter(
+    (t) => t.status === "past_due"
+  ).length;
+  const noticeCount = MOCK_TENANTS.filter(
+    (t) => t.status === "notice"
+  ).length;
 
   return (
     <div className="space-y-4">
@@ -15,7 +18,8 @@ const TenantsPage: FC = () => {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Tenants</h1>
           <p className="text-sm text-slate-600">
-            View residents across your portfolio and track balances at a glance.
+            View residents across your portfolio and track balances at a
+            glance.
           </p>
         </div>
 
@@ -73,7 +77,9 @@ const TenantsPage: FC = () => {
                   </td>
                   <td className="px-4 py-2 align-middle text-sm text-slate-600">
                     {tenant.propertyName}
-                    <div className="text-xs text-slate-400">Unit {tenant.unit}</div>
+                    <div className="text-xs text-slate-400">
+                      Unit {tenant.unit}
+                    </div>
                   </td>
                   <td className="px-4 py-2 align-middle text-sm text-slate-600">
                     {tenant.city}, {tenant.state}
@@ -104,15 +110,15 @@ const TenantsPage: FC = () => {
                     </span>
                   </td>
                   <td className="px-4 py-2 align-middle text-right">
-  <Link
-    to={`/tenants/${tenant.id}`}
-    className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
-  >
-    View details
-  </Link>
-</td>
-
+                    <Link
+                      to={`/tenants/${tenant.id}`}
+                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                    >
+                      View details
+                    </Link>
+                  </td>
                 </tr>
+              ))}
             </tbody>
           </table>
         </div>

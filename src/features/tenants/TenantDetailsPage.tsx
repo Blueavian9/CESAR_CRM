@@ -23,14 +23,11 @@ const TenantDetailsPage: FC = () => {
     );
   }
 
-  // feel free to tweak these fields to match your mockTenants shape
   const fullName = tenant.name;
-  const propertyName = tenant.propertyName ?? tenant.property;
-  const unitLabel = tenant.unit ?? tenant.unitNumber;
-  const status = tenant.status; // e.g. "current" | "former" | "pending"
-  const balance = tenant.balance ?? 0;
-  const email = tenant.email;
-  const phone = tenant.phone;
+  const propertyName = tenant.propertyName;
+  const unitLabel = tenant.unit;
+  const status = tenant.status; // "current" | "past_due" | "notice"
+  const balance = tenant.balance;
   const moveInDate = tenant.moveInDate;
 
   return (
@@ -65,7 +62,7 @@ const TenantDetailsPage: FC = () => {
           </h1>
           <p className="text-sm text-slate-600">
             {propertyName}
-            {unitLabel ? ` • ${unitLabel}` : null}
+            {unitLabel ? ` • Unit ${unitLabel}` : null}
           </p>
           {moveInDate && (
             <p className="mt-1 text-xs text-slate-400">
@@ -79,15 +76,17 @@ const TenantDetailsPage: FC = () => {
             "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize",
             status === "current" &&
               "bg-emerald-50 text-emerald-700 border border-emerald-100",
-            status === "late" &&
+            status === "past_due" &&
+              "bg-rose-50 text-rose-700 border border-rose-100",
+            status === "notice" &&
               "bg-amber-50 text-amber-700 border border-amber-100",
-            status === "former" &&
-              "bg-slate-100 text-slate-600 border border-slate-200",
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          {status}
+          {status === "current" && "Current"}
+          {status === "past_due" && "Past due"}
+          {status === "notice" && "Notice given"}
         </span>
       </div>
 
@@ -105,7 +104,9 @@ const TenantDetailsPage: FC = () => {
         <div className="rounded-lg border bg-white p-3">
           <p className="text-xs text-slate-500">Status</p>
           <p className="mt-1 text-sm font-medium capitalize text-slate-900">
-            {status}
+            {status === "current" && "Current"}
+            {status === "past_due" && "Past due"}
+            {status === "notice" && "Notice given"}
           </p>
         </div>
         <div className="rounded-lg border bg-white p-3">
@@ -133,33 +134,27 @@ const TenantDetailsPage: FC = () => {
         <div className="space-y-4">
           <div className="rounded-lg border bg-white p-4">
             <h2 className="text-sm font-semibold text-slate-900">
-              Contact details
+              Contact & unit details
             </h2>
             <dl className="mt-2 space-y-2 text-xs text-slate-600">
-              {email && (
-                <div className="flex justify-between">
-                  <dt className="text-slate-500">Email</dt>
-                  <dd className="ml-2">{email}</dd>
-                </div>
-              )}
-              {phone && (
-                <div className="flex justify-between">
-                  <dt className="text-slate-500">Phone</dt>
-                  <dd className="ml-2">{phone}</dd>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Property</dt>
+                <dd className="ml-2">{propertyName}</dd>
+              </div>
               {unitLabel && (
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Unit</dt>
                   <dd className="ml-2">{unitLabel}</dd>
                 </div>
               )}
-              {propertyName && (
-                <div className="flex justify-between">
-                  <dt className="text-slate-500">Property</dt>
-                  <dd className="ml-2">{propertyName}</dd>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <dt className="text-slate-500">City</dt>
+                <dd className="ml-2">{tenant.city}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">State</dt>
+                <dd className="ml-2">{tenant.state}</dd>
+              </div>
             </dl>
           </div>
         </div>
