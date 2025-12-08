@@ -1,24 +1,27 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/ui/Sidebar";
 import Topbar from "../../components/ui/Topbar";
+import { SearchProvider } from "../context/SearchContext";
 
 const Layout = () => {
   return (
-    <div className="min-h-screen flex bg-slate-50">
-      {/* Sidebar */}
-      <Sidebar />
+    <SearchProvider>
+      <div className="min-h-screen flex bg-slate-50">
+        {/* Sidebar */}
+        <Sidebar />
 
-      {/* Main area */}
-      <div className="flex-1 flex flex-col">
-        {/* Top bar */}
-        <Topbar />
+        {/* Main area */}
+        <div className="flex-1 flex flex-col">
+          {/* Top bar */}
+          <Topbar />
 
-        {/* Content */}
-        <main className="flex-1 p-4 md:p-6">
-          <Outlet />
-        </main>
+          {/* Content */}
+          <main className="flex-1 p-4 md:p-6">
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </SearchProvider>
   );
 };
 
