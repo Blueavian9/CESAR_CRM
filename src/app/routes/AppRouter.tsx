@@ -8,6 +8,7 @@ import PaymentsPage from "../../features/payments/PaymentsPage";
 import MaintenancePage from "../../features/maintenance/MaintenancePage";
 import PropertyDetailsPage from "../../features/properties/PropertyDetailsPage";
 import TenantDetailsPage from "../../features/tenants/TenantDetailsPage";
+import LeaseDetailsPage from "../../features/leases/LeaseDetailsPage";
 
 const AppRouter = () => {
   return (
@@ -27,6 +28,10 @@ const AppRouter = () => {
 <Route path="/tenants/:id" element={<TenantDetailsPage />} />
 
         <Route path="leases" element={<LeasesPage />} />
+        <Route path="leases" element={<LeasesPage />} />
+<Route path="/leases" element={<LeasesPage />} />
+<Route path="/leases/:id" element={<LeaseDetailsPage />} />
+
         <Route path="payments" element={<PaymentsPage />} />
         <Route path="maintenance" element={<MaintenancePage />} />
 
