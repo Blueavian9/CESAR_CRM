@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { MOCK_PROPERTIES } from "./mockProperties";
+import { MOCK_PROPERTIES } from "./mockProperties.ts";
 
 const PropertiesPage: FC = () => {
   const totalProps = MOCK_PROPERTIES.length;
