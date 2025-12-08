@@ -1,16 +1,81 @@
-import type { FC } from "react";
-import { MOCK_PROPERTIES } from "./mockProperties.ts";
+import { type FC, useState } from "react";
+import { MOCK_PROPERTIES } from "./mockProperties";
+
+type SortKey = "name" | "city" | "type" | "units" | "vacant" | "status";
+type SortDir = "asc" | "desc";
 
 const PropertiesPage: FC = () => {
+  const [sortBy, setSortBy] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "draft">("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+
   const totalProps = MOCK_PROPERTIES.length;
-  const totalUnits = MOCK_PROPERTIES.reduce(
-    (sum, p) => sum + p.unitsTotal,
-    0
-  );
-  const totalVacant = MOCK_PROPERTIES.reduce(
-    (sum, p) => sum + p.unitsVacant,
-    0
-  );
+  const totalUnits = MOCK_PROPERTIES.reduce((sum, p) => sum + p.unitsTotal, 0);
+  const totalVacant = MOCK_PROPERTIES.reduce((sum, p) => sum + p.unitsVacant, 0);
+
+  // Build dropdown options for property types from the mock data
+  const typeOptions = Array.from(new Set(MOCK_PROPERTIES.map((p) => p.type)));
+
+  const handleSort = (key: SortKey) => {
+    if (key === sortBy) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedFiltered = [...MOCK_PROPERTIES]
+    .filter((p) => (statusFilter === "all" ? true : p.status === statusFilter))
+    .filter((p) => (typeFilter === "all" ? true : p.type === typeFilter))
+    .sort((a, b) => {
+      let aVal: string | number = "";
+      let bVal: string | number = "";
+
+      switch (sortBy) {
+        case "name":
+          aVal = a.name;
+          bVal = b.name;
+          break;
+        case "city":
+          aVal = a.city;
+          bVal = b.city;
+          break;
+        case "type":
+          aVal = a.type;
+          bVal = b.type;
+          break;
+        case "status":
+          aVal = a.status;
+          bVal = b.status;
+          break;
+        case "units": {
+          const aUnits = a.unitsTotal === 0 ? 0 : (a.unitsOccupied / a.unitsTotal) * 100;
+          const bUnits = b.unitsTotal === 0 ? 0 : (b.unitsOccupied / b.unitsTotal) * 100;
+          aVal = aUnits;
+          bVal = bUnits;
+          break;
+        }
+        case "vacant":
+          aVal = a.unitsVacant;
+          bVal = b.unitsVacant;
+          break;
+      }
+
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+      }
+
+      return sortDir === "asc"
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
+    });
+
+  const sortIcon = (key: SortKey) => {
+    if (key !== sortBy) return "↕";
+    return sortDir === "asc" ? "↑" : "↓";
+  };
 
   return (
     <div className="space-y-4">
@@ -19,8 +84,7 @@ const PropertiesPage: FC = () => {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Properties</h1>
           <p className="text-sm text-slate-600">
-            Manage your portfolio of residential, commercial, and short-term
-            rentals.
+            Manage your portfolio of residential, commercial, and short-term rentals.
           </p>
         </div>
 
@@ -45,6 +109,47 @@ const PropertiesPage: FC = () => {
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
+          <div className="flex items-center gap-1">
+            <span className="text-slate-500">Status:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as "all" | "active" | "inactive" | "draft")
+              }
+              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs sm:text-sm"
+            >
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <span className="text-slate-500">Type:</span>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs sm:text-sm"
+            >
+              <option value="all">All</option>
+              {typeOptions.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <p className="text-xs text-slate-400">
+          Showing {sortedFiltered.length} of {totalProps} properties
+        </p>
+      </div>
+
       {/* Table */}
       <div className="rounded-lg border bg-white">
         <div className="flex items-center justify-between border-b px-4 py-2">
@@ -60,23 +165,69 @@ const PropertiesPage: FC = () => {
           <table className="min-w-full text-left text-sm">
             <thead className="border-b bg-slate-50 text-xs font-medium text-slate-500">
               <tr>
-                <th className="px-4 py-2">Property</th>
-                <th className="px-4 py-2">Location</th>
-                <th className="px-4 py-2">Type</th>
-                <th className="px-4 py-2">Units</th>
-                <th className="px-4 py-2">Vacant</th>
-                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("name")}
+                    className="inline-flex items-center gap-1"
+                  >
+                    Property <span className="text-[10px]">{sortIcon("name")}</span>
+                  </button>
+                </th>
+                <th className="px-4 py-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("city")}
+                    className="inline-flex items-center gap-1"
+                  >
+                    Location <span className="text-[10px]">{sortIcon("city")}</span>
+                  </button>
+                </th>
+                <th className="px-4 py-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("type")}
+                    className="inline-flex items-center gap-1"
+                  >
+                    Type <span className="text-[10px]">{sortIcon("type")}</span>
+                  </button>
+                </th>
+                <th className="px-4 py-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("units")}
+                    className="inline-flex items-center gap-1"
+                  >
+                    Units <span className="text-[10px]">{sortIcon("units")}</span>
+                  </button>
+                </th>
+                <th className="px-4 py-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("vacant")}
+                    className="inline-flex items-center gap-1"
+                  >
+                    Vacant <span className="text-[10px]">{sortIcon("vacant")}</span>
+                  </button>
+                </th>
+                <th className="px-4 py-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("status")}
+                    className="inline-flex items-center gap-1"
+                  >
+                    Status <span className="text-[10px]">{sortIcon("status")}</span>
+                  </button>
+                </th>
                 <th className="px-4 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {MOCK_PROPERTIES.map((property) => {
+              {sortedFiltered.map((property) => {
                 const occupancy =
                   property.unitsTotal === 0
                     ? 0
-                    : Math.round(
-                        (property.unitsOccupied / property.unitsTotal) * 100
-                      );
+                    : Math.round((property.unitsOccupied / property.unitsTotal) * 100);
 
                 return (
                   <tr
@@ -95,18 +246,14 @@ const PropertiesPage: FC = () => {
                     </td>
                     <td className="px-4 py-2 align-middle text-sm text-slate-600">
                       {property.city}, {property.state}
-                      <div className="text-xs text-slate-400">
-                        {property.address}
-                      </div>
+                      <div className="text-xs text-slate-400">{property.address}</div>
                     </td>
                     <td className="px-4 py-2 align-middle text-sm text-slate-600">
                       {property.type}
                     </td>
                     <td className="px-4 py-2 align-middle text-sm text-slate-600">
                       {property.unitsOccupied}/{property.unitsTotal}
-                      <span className="ml-1 text-xs text-slate-400">
-                        ({occupancy}%)
-                      </span>
+                      <span className="ml-1 text-xs text-slate-400">({occupancy}%)</span>
                     </td>
                     <td className="px-4 py-2 align-middle text-sm text-slate-600">
                       {property.unitsVacant}
