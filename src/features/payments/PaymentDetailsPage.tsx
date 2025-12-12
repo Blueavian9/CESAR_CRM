@@ -23,12 +23,6 @@ const PaymentDetailsPage: FC = () => {
     );
   }
 
-  // Use 'amount' property (adjust based on your actual Payment type)
-  const amount = payment.amount ?? 0;
-
-  // Status should already be correct type
-  const status = payment.status;
-
   return (
     <div className="space-y-6">
       {/* Breadcrumb + back */}
@@ -61,6 +55,7 @@ const PaymentDetailsPage: FC = () => {
           </h1>
           <p className="text-sm text-slate-600">
             {payment.propertyName}
+            {payment.unit && ` • Unit ${payment.unit}`}
           </p>
           <p className="mt-1 text-xs text-slate-400">
             Posted on {payment.date}
@@ -70,17 +65,17 @@ const PaymentDetailsPage: FC = () => {
         <span
           className={[
             "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize",
-            status === "completed" &&
+            payment.status === "completed" &&
               "bg-emerald-50 text-emerald-700 border border-emerald-100",
-            status === "pending" &&
+            payment.status === "pending" &&
               "bg-amber-50 text-amber-700 border border-amber-100",
-            status === "failed" &&
+            payment.status === "failed" &&
               "bg-rose-50 text-rose-700 border border-rose-100",
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          {status}
+          {payment.status}
         </span>
       </div>
 
@@ -89,7 +84,7 @@ const PaymentDetailsPage: FC = () => {
         <div className="rounded-lg border bg-white p-3">
           <p className="text-xs text-slate-500">Amount</p>
           <p className="mt-1 text-xl font-semibold">
-            ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            ${payment.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
         </div>
         <div className="rounded-lg border bg-white p-3">
@@ -101,7 +96,7 @@ const PaymentDetailsPage: FC = () => {
         <div className="rounded-lg border bg-white p-3">
           <p className="text-xs text-slate-500">Reference</p>
           <p className="mt-1 text-sm font-mono text-slate-900">
-            {payment.id}
+            {payment.reference ?? "—"}
           </p>
         </div>
       </div>
@@ -134,6 +129,12 @@ const PaymentDetailsPage: FC = () => {
                 <dt className="text-slate-500">Property</dt>
                 <dd>{payment.propertyName}</dd>
               </div>
+              {payment.unit && (
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Unit</dt>
+                  <dd>{payment.unit}</dd>
+                </div>
+              )}
             </dl>
           </div>
         </div>
