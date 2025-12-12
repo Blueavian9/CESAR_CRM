@@ -23,11 +23,11 @@ const PaymentDetailsPage: FC = () => {
     );
   }
 
-  const amount = payment.amount ?? payment.total ?? 0;
+  // Use 'amount' property (adjust based on your actual Payment type)
+  const amount = payment.amount ?? 0;
 
-  // Normalize status in case mock data ever used "posted"
-  const rawStatus = payment.status;
-  const status = rawStatus === "posted" ? "completed" : rawStatus;
+  // Status should already be correct type
+  const status = payment.status;
 
   return (
     <div className="space-y-6">
@@ -61,7 +61,6 @@ const PaymentDetailsPage: FC = () => {
           </h1>
           <p className="text-sm text-slate-600">
             {payment.propertyName}
-            {payment.unit && ` • Unit ${payment.unit}`}
           </p>
           <p className="mt-1 text-xs text-slate-400">
             Posted on {payment.date}
@@ -102,7 +101,7 @@ const PaymentDetailsPage: FC = () => {
         <div className="rounded-lg border bg-white p-3">
           <p className="text-xs text-slate-500">Reference</p>
           <p className="mt-1 text-sm font-mono text-slate-900">
-            {payment.reference ?? "—"}
+            {payment.id}
           </p>
         </div>
       </div>
@@ -135,12 +134,6 @@ const PaymentDetailsPage: FC = () => {
                 <dt className="text-slate-500">Property</dt>
                 <dd>{payment.propertyName}</dd>
               </div>
-              {payment.unit && (
-                <div className="flex justify-between">
-                  <dt className="text-slate-500">Unit</dt>
-                  <dd>{payment.unit}</dd>
-                </div>
-              )}
             </dl>
           </div>
         </div>
