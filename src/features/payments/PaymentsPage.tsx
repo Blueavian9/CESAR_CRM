@@ -1,5 +1,6 @@
 import { useState, type FC } from "react";
-import { MOCK_PAYMENTS, type Payment, type PaymentStatus } from "./mockPayments";
+import { MOCK_PAYMENTS, type Payment } from "./mockPayments";
+import type { PaymentStatus } from "../../app/types/domain";
 import { Link } from "react-router-dom";
 
 const PaymentsPage: FC = () => {
@@ -19,8 +20,8 @@ const PaymentsPage: FC = () => {
 
   // Calculate stats
   const collected = payments
-    .filter((p) => p.status === "completed")
-    .reduce((sum, p) => sum + p.amount, 0);
+    .filter((p) => p.status === "paid")
+    .reduce((sum, p) => sum + p.amount, 0)
   const outstanding = payments
     .filter((p) => p.status === "pending" || p.status === "failed")
     .reduce((sum, p) => sum + p.amount, 0);
@@ -98,14 +99,14 @@ const PaymentsPage: FC = () => {
             All ({payments.length})
           </button>
           <button
-            onClick={() => setFilterStatus("completed")}
+            onClick={() => setFilterStatus("paid")}
             className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
-              filterStatus === "completed"
+              filterStatus === "paid"
                 ? "bg-emerald-100 text-emerald-700"
                 : "bg-white border text-slate-600 hover:bg-slate-50"
             }`}
           >
-            Completed ({payments.filter((p) => p.status === "completed").length})
+            paid ({payments.filter((p) => p.status === "paid").length})
           </button>
           <button
             onClick={() => setFilterStatus("pending")}
@@ -191,7 +192,7 @@ const PaymentsPage: FC = () => {
                       <span
                         className={[
                           "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                          p.status === "completed" &&
+                          p.status === "paid" &&
                             "bg-emerald-50 text-emerald-700 border border-emerald-100",
                           p.status === "pending" &&
                             "bg-amber-50 text-amber-700 border border-amber-100",
@@ -201,7 +202,7 @@ const PaymentsPage: FC = () => {
                           .filter(Boolean)
                           .join(" ")}
                       >
-                        {p.status === "completed" && "Completed"}
+                        {p.status === "paid" && "paid"}
                         {p.status === "pending" && "Pending"}
                         {p.status === "failed" && "Failed"}
                       </span>
@@ -211,7 +212,7 @@ const PaymentsPage: FC = () => {
                         {p.status === "pending" && (
                           <>
                             <button
-                              onClick={() => handleStatusChange(p.id, "completed")}
+                              onClick={() => handleStatusChange(p.id, "paid")}
                               className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
                             >
                               Mark Paid
@@ -222,7 +223,7 @@ const PaymentsPage: FC = () => {
                         {p.status === "failed" && (
                           <>
                             <button
-                              onClick={() => handleStatusChange(p.id, "completed")}
+                              onClick={() => handleStatusChange(p.id, "paid")}
                               className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
                             >
                               Mark Paid
@@ -269,7 +270,7 @@ const RecordPaymentModal: FC<{
     unit: "",
     method: "ACH",
     amount: "",
-    status: "completed" as PaymentStatus,
+    status:"paid" as PaymentStatus,
     reference: "",
   });
 
@@ -417,7 +418,7 @@ const RecordPaymentModal: FC<{
               }
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="completed">Completed</option>
+              <option value="paid">Paid</option>
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
             </select>
