@@ -1,3 +1,6 @@
+import type { LeaseStatus } from "../../app/types/domain"; // or "@/app/types/domain" if alias works
+
+
 export type LeaseStatus = "active" | "expiring" | "ended";
 
 export interface Lease {
