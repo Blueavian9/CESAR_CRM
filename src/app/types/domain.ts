@@ -1,19 +1,20 @@
-//src/app/types/domain.ts
+// src/app/types/domain.ts
 
 export type EntityStatus = "active" | "inactive" | "draft";
 
 export type LeaseStatus =
-| "pending"
-| "active"
-| "expiring"
-| "terminated"; 
+  | "pending"
+  | "active"
+  | "expiring"
+  | "expired"
+  | "terminated";
 
 export type PaymentStatus =
-| "pending"
-| "paid" 
-| "overdue"
-| "failed" 
-| "refunded"; 
+  | "pending"
+  | "paid"
+  | "overdue"
+  | "failed"
+  | "refunded";
 
 export type MaintenanceStatus = "open" | "in_progress" | "completed" | "cancelled";
 

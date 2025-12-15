@@ -1,4 +1,6 @@
-export type PaymentStatus = "completed" | "pending" | "failed";
+import type { PaymentStatus } from "../../app/types/domain";
+
+export type PaymentStatus = "pending" | "paid" | "overdue" | "failed" | "refunded",
 
 export interface Payment {
   id: string;
