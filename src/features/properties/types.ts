@@ -1,4 +1,6 @@
-export type PropertyStatus = "active" | "inactive" | "draft";
+import type { EntityStatus } from "@/app/types/domain";
+
+export type PropertyStatus = EntityStatus;
 
 export type PropertyType =
   | "Multifamily"
@@ -17,5 +19,5 @@ export interface Property {
   unitsVacant: number;
   type: PropertyType;
   status: PropertyStatus;
-  createdAt: string; // ISO string
+  createdAt: string;
 }
