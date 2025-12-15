@@ -1,4 +1,4 @@
-import type { EntityStatus } from "@/app/types/domain";
+import type { EntityStatus } from "../../app/types/domain";
 
 export type PropertyStatus = EntityStatus;
 

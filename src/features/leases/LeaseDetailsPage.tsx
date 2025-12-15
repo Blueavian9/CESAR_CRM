@@ -1,7 +1,7 @@
 import type { FC } from "react";
-import { useState, type FC } from "react";^M
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { MOCK_LEASES } from "./mockLeases";
+import type { LeaseStatus } from "../../app/types/domain";
 
 const LeaseDetailsPage: FC = () => {
   const { id } = useParams<{ id: string }>();
