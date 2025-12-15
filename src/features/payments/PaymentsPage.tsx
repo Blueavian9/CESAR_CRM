@@ -1,7 +1,12 @@
-import { useState, type FC } from "react";
+import React, { useState, type FC } from "react";
+import { Link } from "react-router-dom";
+
 import { MOCK_PAYMENTS, type Payment } from "./mockPayments";
 import type { PaymentStatus } from "../../app/types/domain";
-import { Link } from "react-router-dom";
+
+import StatusBadge from "../../components/ui/StatusBadge";
+import { PAYMENT_STATUS_LABEL } from "../../app/types/statusLabels.ts";
+import { PAYMENT_STATUS_VARIANT } from "../../app/types/statusStyles";
 
 const PaymentsPage: FC = () => {
   // State management
@@ -13,18 +18,23 @@ const PaymentsPage: FC = () => {
   // Filter and search logic
   const filteredPayments = payments.filter((p) => {
     const matchesStatus = filterStatus === "all" || p.status === filterStatus;
-    const matchesSearch = p.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         p.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch =
+      p.tenantName.toLowerCase().includes(q) ||
+      p.propertyName.toLowerCase().includes(q);
+
     return matchesStatus && matchesSearch;
   });
 
   // Calculate stats
   const collected = payments
     .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + p.amount, 0)
+    .reduce((sum, p) => sum + p.amount, 0);
+
   const outstanding = payments
     .filter((p) => p.status === "pending" || p.status === "failed")
     .reduce((sum, p) => sum + p.amount, 0);
+
   const failedCount = payments.filter((p) => p.status === "failed").length;
 
   // Add new payment
@@ -40,9 +50,7 @@ const PaymentsPage: FC = () => {
   // Update payment status
   const handleStatusChange = (paymentId: string, newStatus: PaymentStatus) => {
     setPayments(
-      payments.map((p) =>
-        p.id === paymentId ? { ...p, status: newStatus } : p
-      )
+      payments.map((p) => (p.id === paymentId ? { ...p, status: newStatus } : p))
     );
   };
 
@@ -59,7 +67,7 @@ const PaymentsPage: FC = () => {
 
         <button
           onClick={() => setShowRecordModal(true)}
-          className="inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+          className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-700"
         >
           + Record Payment
         </button>
@@ -90,40 +98,43 @@ const PaymentsPage: FC = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setFilterStatus("all")}
-            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               filterStatus === "all"
                 ? "bg-indigo-100 text-indigo-700"
-                : "bg-white border text-slate-600 hover:bg-slate-50"
+                : "border bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
             All ({payments.length})
           </button>
+
           <button
             onClick={() => setFilterStatus("paid")}
-            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               filterStatus === "paid"
                 ? "bg-emerald-100 text-emerald-700"
-                : "bg-white border text-slate-600 hover:bg-slate-50"
+                : "border bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
-            paid ({payments.filter((p) => p.status === "paid").length})
+            Paid ({payments.filter((p) => p.status === "paid").length})
           </button>
+
           <button
             onClick={() => setFilterStatus("pending")}
-            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               filterStatus === "pending"
                 ? "bg-amber-100 text-amber-700"
-                : "bg-white border text-slate-600 hover:bg-slate-50"
+                : "border bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
             Pending ({payments.filter((p) => p.status === "pending").length})
           </button>
+
           <button
             onClick={() => setFilterStatus("failed")}
-            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               filterStatus === "failed"
                 ? "bg-rose-100 text-rose-700"
-                : "bg-white border text-slate-600 hover:bg-slate-50"
+                : "border bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
             Failed ({failedCount})
@@ -135,7 +146,7 @@ const PaymentsPage: FC = () => {
           placeholder="Search tenant or property..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="rounded-md border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
@@ -143,11 +154,11 @@ const PaymentsPage: FC = () => {
       <div className="rounded-lg border bg-white">
         <div className="flex items-center justify-between border-b px-4 py-2">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            {filterStatus === "all" ? "All Payments" : `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Payments`}
+            {filterStatus === "all"
+              ? "All Payments"
+              : `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Payments`}
           </p>
-          <p className="text-xs text-slate-400">
-            {filteredPayments.length} payments
-          </p>
+          <p className="text-xs text-slate-400">{filteredPayments.length} payments</p>
         </div>
 
         <div className="overflow-x-auto">
@@ -163,10 +174,14 @@ const PaymentsPage: FC = () => {
                 <th className="px-4 py-2 text-right">Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
+                  <td
+                    colSpan={7}
+                    className="px-4 py-8 text-center text-sm text-slate-500"
+                  >
                     No payments found
                   </td>
                 </tr>
@@ -177,39 +192,35 @@ const PaymentsPage: FC = () => {
                     className="border-b last:border-0 hover:bg-slate-50/60"
                   >
                     <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
+
                     <td className="px-4 py-2 text-sm font-medium text-slate-900">
                       {p.tenantName}
                     </td>
+
                     <td className="px-4 py-2 text-sm text-slate-600">
                       {p.propertyName}
-                      {p.unit && <div className="text-xs text-slate-400">Unit {p.unit}</div>}
+                      {p.unit && (
+                        <div className="text-xs text-slate-400">Unit {p.unit}</div>
+                      )}
                     </td>
+
                     <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
+
                     <td className="px-4 py-2 text-sm text-slate-600">
                       ${p.amount.toLocaleString()}
                     </td>
+
+                    {/* ✅ StatusBadge goes HERE (this is where p exists) */}
                     <td className="px-4 py-2">
-                      <span
-                        className={[
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                          p.status === "paid" &&
-                            "bg-emerald-50 text-emerald-700 border border-emerald-100",
-                          p.status === "pending" &&
-                            "bg-amber-50 text-amber-700 border border-amber-100",
-                          p.status === "failed" &&
-                            "bg-rose-50 text-rose-700 border border-rose-100",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        {p.status === "paid" && "paid"}
-                        {p.status === "pending" && "Pending"}
-                        {p.status === "failed" && "Failed"}
-                      </span>
+                      <StatusBadge
+                        label={PAYMENT_STATUS_LABEL[p.status]}
+                        variant={PAYMENT_STATUS_VARIANT[p.status]}
+                      />
                     </td>
+
                     <td className="px-4 py-2 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {p.status === "pending" && (
+                        {(p.status === "pending" || p.status === "failed") && (
                           <>
                             <button
                               onClick={() => handleStatusChange(p.id, "paid")}
@@ -220,17 +231,7 @@ const PaymentsPage: FC = () => {
                             <span className="text-slate-300">|</span>
                           </>
                         )}
-                        {p.status === "failed" && (
-                          <>
-                            <button
-                              onClick={() => handleStatusChange(p.id, "paid")}
-                              className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
-                            >
-                              Mark Paid
-                            </button>
-                            <span className="text-slate-300">|</span>
-                          </>
-                        )}
+
                         <Link
                           to={`/payments/${p.id}`}
                           className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
@@ -264,31 +265,34 @@ const RecordPaymentModal: FC<{
   onSubmit: (payment: Omit<Payment, "id">) => void;
 }> = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split("T")[0], // Today's date in YYYY-MM-DD
+    date: new Date().toISOString().split("T")[0],
     tenantName: "",
     propertyName: "",
     unit: "",
     method: "ACH",
     amount: "",
-    status:"paid" as PaymentStatus,
+    status: "paid" as PaymentStatus,
     reference: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     onSubmit({
       ...formData,
+      unit: formData.unit.trim() ? formData.unit : undefined,
       amount: parseFloat(formData.amount),
     });
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-semibold mb-4">Record Payment</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold">Record Payment</h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Date
             </label>
             <input
@@ -296,12 +300,12 @@ const RecordPaymentModal: FC<{
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Tenant Name
             </label>
             <input
@@ -311,13 +315,13 @@ const RecordPaymentModal: FC<{
               onChange={(e) =>
                 setFormData({ ...formData, tenantName: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="e.g., Maria Lopez"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Property Name
             </label>
             <input
@@ -327,36 +331,32 @@ const RecordPaymentModal: FC<{
               onChange={(e) =>
                 setFormData({ ...formData, propertyName: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="e.g., Ever Hills Apartments"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Unit (optional)
             </label>
             <input
               type="text"
               value={formData.unit}
-              onChange={(e) =>
-                setFormData({ ...formData, unit: e.target.value })
-              }
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+              className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="e.g., 105"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Payment Method
             </label>
             <select
               value={formData.method}
-              onChange={(e) =>
-                setFormData({ ...formData, method: e.target.value })
-              }
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onChange={(e) => setFormData({ ...formData, method: e.target.value })}
+              className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="ACH">ACH Transfer</option>
               <option value="Card">Credit/Debit Card</option>
@@ -369,7 +369,7 @@ const RecordPaymentModal: FC<{
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Amount
             </label>
             <div className="relative">
@@ -380,17 +380,15 @@ const RecordPaymentModal: FC<{
                 step="0.01"
                 min="0"
                 value={formData.amount}
-                onChange={(e) =>
-                  setFormData({ ...formData, amount: e.target.value })
-                }
-                className="w-full pl-7 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                className="w-full rounded-md border py-2 pl-7 pr-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="0.00"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Reference/Transaction ID (optional)
             </label>
             <input
@@ -399,28 +397,27 @@ const RecordPaymentModal: FC<{
               onChange={(e) =>
                 setFormData({ ...formData, reference: e.target.value })
               }
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="e.g., ACH-2024120100145"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Status
             </label>
             <select
               value={formData.status}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  status: e.target.value as PaymentStatus,
-                })
+                setFormData({ ...formData, status: e.target.value as PaymentStatus })
               }
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="paid">Paid</option>
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
+              <option value="overdue">Overdue</option>
+              <option value="refunded">Refunded</option>
             </select>
           </div>
 
@@ -428,13 +425,13 @@ const RecordPaymentModal: FC<{
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border rounded-md hover:bg-slate-50"
+              className="flex-1 rounded-md border px-4 py-2 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="flex-1 rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
             >
               Record Payment
             </button>
