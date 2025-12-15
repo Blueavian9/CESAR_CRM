@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useState, type FC } from "react";^M
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { MOCK_LEASES } from "./mockLeases";
 
