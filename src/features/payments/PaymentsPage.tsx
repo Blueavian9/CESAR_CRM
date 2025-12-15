@@ -1,19 +1,53 @@
-import type { FC } from "react";
-import { MOCK_PAYMENTS } from "./mockPayments.ts";
+import { useState, type FC } from "react";
+import { MOCK_PAYMENTS, type Payment, type PaymentStatus } from "./mockPayments";
 import { Link } from "react-router-dom";
 
 const PaymentsPage: FC = () => {
-  const collected = MOCK_PAYMENTS.filter((p) => p.status === "completed").reduce(
-    (sum, p) => sum + p.amount,
-    0
-  );
-  const outstanding = MOCK_PAYMENTS.filter(
-    (p) => p.status === "pending" || p.status === "failed"
-  ).reduce((sum, p) => sum + p.amount, 0);
-  const failedCount = MOCK_PAYMENTS.filter((p) => p.status === "failed").length;
+  // State management
+  const [payments, setPayments] = useState<Payment[]>(MOCK_PAYMENTS);
+  const [showRecordModal, setShowRecordModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<PaymentStatus | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter and search logic
+  const filteredPayments = payments.filter((p) => {
+    const matchesStatus = filterStatus === "all" || p.status === filterStatus;
+    const matchesSearch = p.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         p.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  // Calculate stats
+  const collected = payments
+    .filter((p) => p.status === "completed")
+    .reduce((sum, p) => sum + p.amount, 0);
+  const outstanding = payments
+    .filter((p) => p.status === "pending" || p.status === "failed")
+    .reduce((sum, p) => sum + p.amount, 0);
+  const failedCount = payments.filter((p) => p.status === "failed").length;
+
+  // Add new payment
+  const handleRecordPayment = (newPayment: Omit<Payment, "id">) => {
+    const payment: Payment = {
+      ...newPayment,
+      id: `p${Date.now()}`,
+    };
+    setPayments([payment, ...payments]);
+    setShowRecordModal(false);
+  };
+
+  // Update payment status
+  const handleStatusChange = (paymentId: string, newStatus: PaymentStatus) => {
+    setPayments(
+      payments.map((p) =>
+        p.id === paymentId ? { ...p, status: newStatus } : p
+      )
+    );
+  };
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Payments</h1>
@@ -22,14 +56,18 @@ const PaymentsPage: FC = () => {
           </p>
         </div>
 
-        <button className="inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
-          Record Payment
+        <button
+          onClick={() => setShowRecordModal(true)}
+          className="inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+        >
+          + Record Payment
         </button>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-lg border bg-white p-3">
-          <p className="text-xs text-slate-500">Collected (sample month)</p>
+          <p className="text-xs text-slate-500">Collected</p>
           <p className="mt-1 text-xl font-semibold">
             ${collected.toLocaleString()}
           </p>
@@ -46,13 +84,68 @@ const PaymentsPage: FC = () => {
         </div>
       </div>
 
+      {/* Filters and Search */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilterStatus("all")}
+            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+              filterStatus === "all"
+                ? "bg-indigo-100 text-indigo-700"
+                : "bg-white border text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            All ({payments.length})
+          </button>
+          <button
+            onClick={() => setFilterStatus("completed")}
+            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+              filterStatus === "completed"
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-white border text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            Completed ({payments.filter((p) => p.status === "completed").length})
+          </button>
+          <button
+            onClick={() => setFilterStatus("pending")}
+            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+              filterStatus === "pending"
+                ? "bg-amber-100 text-amber-700"
+                : "bg-white border text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            Pending ({payments.filter((p) => p.status === "pending").length})
+          </button>
+          <button
+            onClick={() => setFilterStatus("failed")}
+            className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${
+              filterStatus === "failed"
+                ? "bg-rose-100 text-rose-700"
+                : "bg-white border text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            Failed ({failedCount})
+          </button>
+        </div>
+
+        <input
+          type="text"
+          placeholder="Search tenant or property..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+
+      {/* Payments Table */}
       <div className="rounded-lg border bg-white">
         <div className="flex items-center justify-between border-b px-4 py-2">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Recent Activity
+            {filterStatus === "all" ? "All Payments" : `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Payments`}
           </p>
           <p className="text-xs text-slate-400">
-            {MOCK_PAYMENTS.length} payments
+            {filteredPayments.length} payments
           </p>
         </div>
 
@@ -69,55 +162,283 @@ const PaymentsPage: FC = () => {
                 <th className="px-4 py-2 text-right">Actions</th>
               </tr>
             </thead>
-          <tbody>
-  {MOCK_PAYMENTS.map((p) => (
-    <tr
-      key={p.id}
-      className="border-b last:border-0 hover:bg-slate-50/60"
-    >
-      <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
-      <td className="px-4 py-2 text-sm font-medium text-slate-900">
-        {p.tenantName}
-      </td>
-      <td className="px-4 py-2 text-sm text-slate-600">
-        {p.propertyName}
-      </td>
-      <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
-      <td className="px-4 py-2 text-sm text-slate-600">
-        ${p.amount.toLocaleString()}
-      </td>
-      <td className="px-4 py-2">
-        <span
-          className={[
-            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-            p.status === "completed" &&
-              "bg-emerald-50 text-emerald-700 border border-emerald-100",
-            p.status === "pending" &&
-              "bg-amber-50 text-amber-700 border border-amber-100",
-            p.status === "failed" &&
-              "bg-rose-50 text-rose-700 border border-rose-100",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          {p.status === "completed" && "Completed"}
-          {p.status === "pending" && "Pending"}
-          {p.status === "failed" && "Failed"}
-        </span>
-      </td>
-      <td className="px-4 py-2 align-middle text-right">
-        <Link
-          to={`/payments/${p.id}`}
-          className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
-        >
-          View details
-        </Link>
-      </td>
-    </tr>
-  ))}
-</tbody>
+            <tbody>
+              {filteredPayments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
+                    No payments found
+                  </td>
+                </tr>
+              ) : (
+                filteredPayments.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="border-b last:border-0 hover:bg-slate-50/60"
+                  >
+                    <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
+                    <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                      {p.tenantName}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-slate-600">
+                      {p.propertyName}
+                      {p.unit && <div className="text-xs text-slate-400">Unit {p.unit}</div>}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
+                    <td className="px-4 py-2 text-sm text-slate-600">
+                      ${p.amount.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={[
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                          p.status === "completed" &&
+                            "bg-emerald-50 text-emerald-700 border border-emerald-100",
+                          p.status === "pending" &&
+                            "bg-amber-50 text-amber-700 border border-amber-100",
+                          p.status === "failed" &&
+                            "bg-rose-50 text-rose-700 border border-rose-100",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        {p.status === "completed" && "Completed"}
+                        {p.status === "pending" && "Pending"}
+                        {p.status === "failed" && "Failed"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {p.status === "pending" && (
+                          <>
+                            <button
+                              onClick={() => handleStatusChange(p.id, "completed")}
+                              className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                            >
+                              Mark Paid
+                            </button>
+                            <span className="text-slate-300">|</span>
+                          </>
+                        )}
+                        {p.status === "failed" && (
+                          <>
+                            <button
+                              onClick={() => handleStatusChange(p.id, "completed")}
+                              className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                            >
+                              Mark Paid
+                            </button>
+                            <span className="text-slate-300">|</span>
+                          </>
+                        )}
+                        <Link
+                          to={`/payments/${p.id}`}
+                          className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                        >
+                          View
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Record Payment Modal */}
+      {showRecordModal && (
+        <RecordPaymentModal
+          onClose={() => setShowRecordModal(false)}
+          onSubmit={handleRecordPayment}
+        />
+      )}
+    </div>
+  );
+};
+
+// Record Payment Modal Component
+const RecordPaymentModal: FC<{
+  onClose: () => void;
+  onSubmit: (payment: Omit<Payment, "id">) => void;
+}> = ({ onClose, onSubmit }) => {
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split("T")[0], // Today's date in YYYY-MM-DD
+    tenantName: "",
+    propertyName: "",
+    unit: "",
+    method: "ACH",
+    amount: "",
+    status: "completed" as PaymentStatus,
+    reference: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      amount: parseFloat(formData.amount),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <h2 className="text-lg font-semibold mb-4">Record Payment</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Date
+            </label>
+            <input
+              type="date"
+              required
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Tenant Name
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.tenantName}
+              onChange={(e) =>
+                setFormData({ ...formData, tenantName: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g., Maria Lopez"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Property Name
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.propertyName}
+              onChange={(e) =>
+                setFormData({ ...formData, propertyName: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g., Ever Hills Apartments"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Unit (optional)
+            </label>
+            <input
+              type="text"
+              value={formData.unit}
+              onChange={(e) =>
+                setFormData({ ...formData, unit: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g., 105"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Payment Method
+            </label>
+            <select
+              value={formData.method}
+              onChange={(e) =>
+                setFormData({ ...formData, method: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="ACH">ACH Transfer</option>
+              <option value="Card">Credit/Debit Card</option>
+              <option value="Check">Check</option>
+              <option value="Cash">Cash</option>
+              <option value="Wire">Wire Transfer</option>
+              <option value="Zelle">Zelle</option>
+              <option value="Venmo">Venmo</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Amount
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-2 text-slate-500">$</span>
+              <input
+                type="number"
+                required
+                step="0.01"
+                min="0"
+                value={formData.amount}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: e.target.value })
+                }
+                className="w-full pl-7 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Reference/Transaction ID (optional)
+            </label>
+            <input
+              type="text"
+              value={formData.reference}
+              onChange={(e) =>
+                setFormData({ ...formData, reference: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g., ACH-2024120100145"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Status
+            </label>
+            <select
+              value={formData.status}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  status: e.target.value as PaymentStatus,
+                })
+              }
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border rounded-md hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            >
+              Record Payment
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
