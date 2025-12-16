@@ -1,11 +1,11 @@
-import React, { useState, type FC } from "react";
+import { useState, type FC } from "react";
 import { Link } from "react-router-dom";
 
 import { MOCK_PAYMENTS, type Payment } from "./mockPayments";
-import type { PaymentStatus } from "../../app/types/domain";
+import type { PaymentStatus } from "../../app/types/domain"; 
 
 import StatusBadge from "../../components/ui/StatusBadge";
-import { PAYMENT_STATUS_LABEL } from "../../app/types/statusLabels.ts";
+import { PAYMENT_STATUS_LABEL } from "../../app/types/statusLabels";
 import { PAYMENT_STATUS_VARIANT } from "../../app/types/statusStyles";
 
 const PaymentsPage: FC = () => {
@@ -178,11 +178,11 @@ const PaymentsPage: FC = () => {
             <tbody>
               {filteredPayments.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={7}
-                    className="px-4 py-8 text-center text-sm text-slate-500"
-                  >
-                    No payments found
+                  <td className="px-4 py-2">
+                    <StatusBadge
+                      label={PAYMENT_STATUS_LABEL[payments.status]}
+                      variant=[PAYMENT_STATUS_VARIANT[p.status]}
+                      />
                   </td>
                 </tr>
               ) : (
