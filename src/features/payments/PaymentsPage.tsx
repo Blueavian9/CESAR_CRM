@@ -2,7 +2,7 @@ import { useState, type FC } from "react";
 import { Link } from "react-router-dom";
 
 import { MOCK_PAYMENTS, type Payment } from "./mockPayments";
-import type { PaymentStatus } from "../../app/types/domain"; 
+import type { PaymentStatus } from "../../app/types/domain";
 
 import StatusBadge from "../../components/ui/StatusBadge";
 import { PAYMENT_STATUS_LABEL } from "../../app/types/statusLabels";
@@ -81,12 +81,14 @@ const PaymentsPage: FC = () => {
             ${collected.toLocaleString()}
           </p>
         </div>
+
         <div className="rounded-lg border bg-white p-3">
           <p className="text-xs text-slate-500">Outstanding</p>
           <p className="mt-1 text-xl font-semibold">
             ${outstanding.toLocaleString()}
           </p>
         </div>
+
         <div className="rounded-lg border bg-white p-3">
           <p className="text-xs text-slate-500">Failed Payments</p>
           <p className="mt-1 text-xl font-semibold">{failedCount}</p>
@@ -158,7 +160,9 @@ const PaymentsPage: FC = () => {
               ? "All Payments"
               : `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Payments`}
           </p>
-          <p className="text-xs text-slate-400">{filteredPayments.length} payments</p>
+          <p className="text-xs text-slate-400">
+            {filteredPayments.length} payments
+          </p>
         </div>
 
         <div className="overflow-x-auto">
@@ -175,65 +179,48 @@ const PaymentsPage: FC = () => {
               </tr>
             </thead>
 
-                     <tbody>
-  {filteredPayments.length === 0 ? (
-    <tr>
-      <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
-        No payments found
-      </td>
-    </tr>
-  ) : (
-    filteredPayments.map((p) => (
-      <tr key={p.id} className="border-b last:border-0 hover:bg-slate-50/60">
-        <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
+            <tbody>
+              {filteredPayments.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-8 text-center text-sm text-slate-500"
+                  >
+                    No payments found
+                  </td>
+                </tr>
+              ) : (
+                filteredPayments.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="border-b last:border-0 hover:bg-slate-50/60"
+                  >
+                    <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
 
-        <td className="px-4 py-2 text-sm font-medium text-slate-900">
-          {p.tenantName}
-        </td>
+                    <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                      {p.tenantName}
+                    </td>
 
-        <td className="px-4 py-2 text-sm text-slate-600">
-          {p.propertyName}
-          {p.unit && <div className="text-xs text-slate-400">Unit {p.unit}</div>}
-        </td>
+                    <td className="px-4 py-2 text-sm text-slate-600">
+                      {p.propertyName}
+                      {p.unit && (
+                        <div className="text-xs text-slate-400">Unit {p.unit}</div>
+                      )}
+                    </td>
 
-        <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
+                    <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
 
-        <td className="px-4 py-2 text-sm text-slate-600">
-          ${p.amount.toLocaleString()}
-        </td>
+                    <td className="px-4 py-2 text-sm text-slate-600">
+                      ${p.amount.toLocaleString()}
+                    </td>
 
-        <td className="px-4 py-2">
-          <StatusBadge
-            label={PAYMENT_STATUS_LABEL[p.status]}
-            variant={PAYMENT_STATUS_VARIANT[p.status]}
-          />
-        </td>
-        <td className="px-4 py-2 text-right">
-          <div className="flex items-center justify-end gap-2">
-            {(p.status === "pending" || p.status === "failed") && (
-              <>
-                <button
-                  onClick={() => handleStatusChange(p.id, "paid")}
-                  className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
-                >
-                  Mark Paid
-                </button>
-                <span className="text-slate-300">|</span>
-              </>
-            )}
+                    <td className="px-4 py-2">
+                      <StatusBadge
+                        label={PAYMENT_STATUS_LABEL[p.status]}
+                        variant={PAYMENT_STATUS_VARIANT[p.status]}
+                      />
+                    </td>
 
-            <Link
-              to={`/payments/${p.id}`}
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
-            >
-              View
-            </Link>
-          </div>
-        </td>
-      </tr>
-    ))
-  )}
-</tbody>
                     <td className="px-4 py-2 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {(p.status === "pending" || p.status === "failed") && (
@@ -371,7 +358,9 @@ const RecordPaymentModal: FC<{
             </label>
             <select
               value={formData.method}
-              onChange={(e) => setFormData({ ...formData, method: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, method: e.target.value })
+              }
               className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="ACH">ACH Transfer</option>
@@ -396,7 +385,9 @@ const RecordPaymentModal: FC<{
                 step="0.01"
                 min="0"
                 value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: e.target.value })
+                }
                 className="w-full rounded-md border py-2 pl-7 pr-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="0.00"
               />
@@ -425,7 +416,10 @@ const RecordPaymentModal: FC<{
             <select
               value={formData.status}
               onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value as PaymentStatus })
+                setFormData({
+                  ...formData,
+                  status: e.target.value as PaymentStatus,
+                })
               }
               className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
