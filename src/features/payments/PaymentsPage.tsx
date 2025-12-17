@@ -175,109 +175,65 @@ const PaymentsPage: FC = () => {
               </tr>
             </thead>
 
-            <tbody>
-              {filteredPayments.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-2">
-                    <StatusBadge
-                      label={PAYMENT_STATUS_LABEL[payments.status]}
-                      variant={[PAYMENT_STATUS_VARIANT[p.status]}
-                      />
-                  </td>
-                </tr>
-              ) : (
-                filteredPayments.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b last:border-0 hover:bg-slate-50/60"
-                  >
-                    <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
-
-                    <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                      {p.tenantName}
-                    </td>
-
-                    <td className="px-4 py-2 text-sm text-slate-600">
-                      {p.propertyName}
-                      {p.unit && (
-                        <div className="text-xs text-slate-400">Unit {p.unit}</div>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
-
-                    <td className="px-4 py-2 text-sm text-slate-600">
-                      ${p.amount.toLocaleString()}
-                    </td>
-{filteredPayments.length === 0 ? (
-  <tr>
-    <td
-      colSpan={7}
-      className="px-4 py-8 text-center text-sm text-slate-500"
-    >
-      No payments found
-    </td>
-  </tr>
-) : (
-  filteredPayments.map((p) => (
-    <tr
-      key={p.id}
-      className="border-b last:border-0 hover:bg-slate-50/60"
-    >
-      <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
-
-      <td className="px-4 py-2 text-sm font-medium text-slate-900">
-        {p.tenantName}
-      </td>
-
-      <td className="px-4 py-2 text-sm text-slate-600">
-        {p.propertyName}
-        {p.unit && (
-          <div className="text-xs text-slate-400">Unit {p.unit}</div>
-        )}
-      </td>
-
-      <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
-
-      <td className="px-4 py-2 text-sm text-slate-600">
-        ${p.amount.toLocaleString()}
-      </td>
-
-      <td className="px-4 py-2">
-        <StatusBadge
-          label={PAYMENT_STATUS_LABEL[p.status]}
-          variant={PAYMENT_STATUS_VARIANT[p.status]}
-        />
-      </td>
-
-      <td className="px-4 py-2 text-right">
-        <div className="flex items-center justify-end gap-2">
-          {(p.status === "pending" || p.status === "failed") && (
-            <>
-              <button
-                onClick={() => handleStatusChange(p.id, "paid")}
-                className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
-              >
-                Mark Paid
-              </button>
-              <span className="text-slate-300">|</span>
-            </>
-          )}
-
-          <Link
-            to={`/payments/${p.id}`}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
-          >
-            View
-          </Link>
-        </div>
+                     <tbody>
+  {filteredPayments.length === 0 ? (
+    <tr>
+      <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
+        No payments found
       </td>
     </tr>
-  ))
-)}
+  ) : (
+    filteredPayments.map((p) => (
+      <tr key={p.id} className="border-b last:border-0 hover:bg-slate-50/60">
+        <td className="px-4 py-2 text-sm text-slate-600">{p.date}</td>
 
-                   
+        <td className="px-4 py-2 text-sm font-medium text-slate-900">
+          {p.tenantName}
+        </td>
 
+        <td className="px-4 py-2 text-sm text-slate-600">
+          {p.propertyName}
+          {p.unit && <div className="text-xs text-slate-400">Unit {p.unit}</div>}
+        </td>
+
+        <td className="px-4 py-2 text-sm text-slate-600">{p.method}</td>
+
+        <td className="px-4 py-2 text-sm text-slate-600">
+          ${p.amount.toLocaleString()}
+        </td>
+
+        <td className="px-4 py-2">
+          <StatusBadge
+            label={PAYMENT_STATUS_LABEL[p.status]}
+            variant={PAYMENT_STATUS_VARIANT[p.status]}
+          />
+        </td>
+        <td className="px-4 py-2 text-right">
+          <div className="flex items-center justify-end gap-2">
+            {(p.status === "pending" || p.status === "failed") && (
+              <>
+                <button
+                  onClick={() => handleStatusChange(p.id, "paid")}
+                  className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                >
+                  Mark Paid
+                </button>
+                <span className="text-slate-300">|</span>
+              </>
+            )}
+
+            <Link
+              to={`/payments/${p.id}`}
+              className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+            >
+              View
+            </Link>
+          </div>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
                     <td className="px-4 py-2 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {(p.status === "pending" || p.status === "failed") && (
