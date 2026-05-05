@@ -1,4 +1,4 @@
-# EverCRM – Application Architecture
+# CESAR/CRM – Application Architecture
 
 ## 1. Technology Stack
 
@@ -374,4 +374,4 @@ Each phase can be shipped iteratively as a milestone.
 
 ---
 
-EverCRM is designed as a modular, multi-tenant, enterprise-ready property management platform that can scale from a single landlord to large portfolios with thousands of units.
+CESAR/CRM is designed as a modular, multi-tenant, enterprise-ready property management platform that can scale from a single landlord to large portfolios with thousands of units.
