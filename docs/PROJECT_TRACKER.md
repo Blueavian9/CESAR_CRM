@@ -1,69 +1,73 @@
 # CESAR/CRM — Project Tracker
 
-> **Read this file first, every session, before touching code or asking the user to re-explain context.**
-> Update the "Last Session Log" section at the end of every work session — even a short one — before ending the conversation. That's what makes cross-LLM resume actually work.
+> **Read `docs/PROJECT_PRD.md` and this file first, every session, before touching code.**
+> PRD = scope & acceptance criteria (source of truth for *what*). This file = status & log (source of truth for *where things stand*). Don't let them drift — if scope changes, edit the PRD and log the change here.
+> Update the "Last Session Log" section at the end of every work session — even a short one — before ending the conversation.
 
 ---
 
 ## 1. Project Snapshot
 
-- **What it is:** Multi-tenant property management platform (landlords/PMs, tenants, leases, payments, maintenance, screening, communications).
+- **What it is:** Multi-tenant property management platform (landlords/PMs, tenants, leases, payments, maintenance, screening).
 - **Stack:** React 18 + TypeScript + Vite, Tailwind CSS, Lucide icons.
-- **Origin:** Scaffolded via Bolt.new. `ARCHITECTURE.md` in the repo root still describes the *original* Bolt.new stack (Bolt Database for auth/storage/real-time/REST+RLS).
-- **Current direction:** Migrating off Bolt Database → **Supabase** (Postgres + Auth + Storage + Realtime + RLS). This decision predates this tracker; a prior "16-EPIC PRD" reportedly detailed the migration but the file is currently missing/unlocated.
-- **Status:** Paused mid-migration for client/portfolio work. Resuming now.
+- **Backend:** Supabase (Postgres + Auth + Storage + Realtime + RLS) — confirmed direction, replacing the original Bolt.new/Bolt Database scaffold.
+- **Full scope:** `docs/PROJECT_PRD.md` (18 epics, reconstructed — original PRD not located).
+- **Status:** Resuming from pause. Phase 1 (Foundation & Auth / Supabase migration) not yet started this session.
 
-## 2. Known Discrepancies to Resolve First
+## 2. Open Items
 
-- [ ] Locate or reconstruct the 16-EPIC PRD (check: old chat exports, Notion, Google Docs, local `/docs`, git log/branches for a `supabase-migration` branch, closed GitHub issues/PRs).
-- [ ] `ARCHITECTURE.md` needs a rewrite pass once Supabase migration scope is confirmed — right now it's Bolt-flavored and will mislead any future contributor (including future LLM sessions) if left as-is.
-- [ ] Confirm current `package.json` deps: is `@bolt/*` or Bolt SDK still present? Is `@supabase/supabase-js` already installed? (Determines how far migration actually got before pause.)
+- [ ] Original 16-EPIC PRD still not located (checked: none found yet — see prior session log). Current `docs/PROJECT_PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
+- [ ] `ARCHITECTURE.md` in repo root is still Bolt-flavored — leave as-is until Epic 1 is functionally complete, then rewrite (see PRD §7).
+- [ ] Confirm current `package.json`: is any Bolt SDK still present? Is `@supabase/supabase-js` already installed? (Determines how far the migration got before pause — check before assuming Epic 1 starts from zero.)
 
-## 3. Phase Checklist (from ARCHITECTURE.md §4, annotated for the Supabase migration)
+## 3. Phase / Epic Checklist
 
-- [ ] **Phase 1 — Foundation & Auth**
-  - [ ] Decide final backend: Supabase (assumed) — confirm no reason to reconsider
-  - [ ] Stand up Supabase project (or confirm one already exists)
-  - [ ] Port `users` table + role model (`admin`/`manager`/`tenant`) to Supabase Auth + profile table
-  - [ ] Recreate RLS policies per table (Bolt RLS ≠ Supabase RLS syntax — needs rewrite, not copy-paste)
-  - [ ] Swap Bolt SDK calls → `@supabase/supabase-js` client setup
-- [ ] **Phase 2 — Dashboard & Properties**
-- [ ] **Phase 3 — Tenants & Leads**
-- [ ] **Phase 4 — Screening**
-- [ ] **Phase 5 — Leases**
-- [ ] **Phase 6 — Payments & Rent Collection**
-- [ ] **Phase 7 — Maintenance Requests**
-- [ ] **Phase 8 — Communications & Notifications**
-- [ ] **Phase 9 — Tenant Portal**
-- [ ] **Phase 10 — Reporting & Analytics**
-- [ ] **Phase 11 — Document Management** (Bolt Storage → Supabase Storage buckets)
-- [ ] **Phase 12 — Security & Compliance**
-- [ ] **Phase 13 — Automation & Workflows**
-- [ ] **Phase 14 — Integrations & API**
-- [ ] **Phase 15 — SEO & Performance**
-- [ ] **Phase 16 — Mobile & PWA**
-- [ ] **Phase 17 — Testing & QA**
-- [ ] **Phase 18 — Deployment & Launch**
+Full scope and acceptance criteria for each epic are in `docs/PROJECT_PRD.md` §6. This section tracks completion only — don't duplicate the criteria text here, just check items off as the PRD's stated criteria are met.
 
-(Phases 1–18 mirror ARCHITECTURE.md's original list; the Supabase migration mostly front-loads work into Phase 1 and Phase 11, everything else is largely stack-agnostic once the client wrapper is swapped.)
+- [ ] **Epic 1 — Foundation & Auth (Supabase migration)**
+  - [ ] Supabase project provisioned/confirmed
+  - [ ] `users`/`organizations` tables + Auth signup wiring
+  - [ ] Role model (`admin`/`manager`/`tenant`) enforced via RLS
+  - [ ] Bolt SDK fully removed, `@supabase/supabase-js` centralized client in place
+  - [ ] RLS policy pass across existing tables
+  - [ ] Login/signup/forgot-password/tenant-login flows working end-to-end
+  - [ ] *All 3 PRD acceptance criteria for Epic 1 verified*
+- [ ] **Epic 2 — Dashboard & Properties**
+- [ ] **Epic 3 — Tenants & Leads**
+- [ ] **Epic 4 — Screening**
+- [ ] **Epic 5 — Leases**
+- [ ] **Epic 6 — Payments & Rent Collection** (schema/UI only, no live processor — see PRD Non-Goals)
+- [ ] **Epic 7 — Maintenance Requests**
+- [ ] **Epic 8 — Communications & Notifications**
+- [ ] **Epic 9 — Tenant Portal**
+- [ ] **Epic 10 — Reporting & Analytics**
+- [ ] **Epic 11 — Document Management** (Bolt Storage → Supabase Storage)
+- [ ] **Epic 12 — Security & Compliance**
+- [ ] **Epic 13 — Automation & Workflows**
+- [ ] **Epic 14 — Integrations & API**
+- [ ] **Epic 15 — SEO & Performance** (public pages — can run in parallel, no blockers)
+- [ ] **Epic 16 — Mobile & PWA**
+- [ ] **Epic 17 — Testing & QA** (continuous, formalize before launch)
+- [ ] **Epic 18 — Deployment & Launch**
 
-## 4. Core Schema Reference
+## 4. Housekeeping Log
 
-Tables (see ARCHITECTURE.md §3 for full column lists): `users`, `organizations`, `properties`, `units`, `tenants`, `leads`, `applications`, `screenings`, `leases`, `payments`, `maintenance_requests`, `communications`, `documents`, `notifications`, `audit_logs`.
+- `npm audit fix` run — 0 vulnerabilities remaining (was 13: 1 low, 1 moderate, 11 high).
+- `docs/PROJECT_TRACKER.md` + lockfile committed and pushed (`ce1b03e`, 2026-08-31).
+- `docs/PROJECT_PRD.md` drafted (reconstructed, 18 epics) — commit pending.
 
-No schema changes needed for the migration itself — Postgres → Postgres. The work is auth/RLS/storage/client-SDK, not data modeling.
-
-## 5. Housekeeping Log
-
-- `npm audit fix` run — 0 vulnerabilities remaining (was 13: 1 low, 1 moderate, 11 high). `package-lock.json` updated, `package.json` unchanged. Safe to commit as its own small commit.
-
-## 6. Last Session Log
+## 5. Last Session Log
 
 *(Most recent entry on top. One entry per session — a few lines is enough: what changed, what's next, any open decision.)*
+
+### 2026-08-31 (cont'd)
+- Drafted full PRD (`docs/PROJECT_PRD.md`) — 18 epics with scope, acceptance criteria, dependency graph. Reconstructed from ARCHITECTURE.md since original PRD wasn't located.
+- Rewrote this tracker's checklist to mirror the PRD's Epic 1 criteria 1:1 instead of the earlier shorthand version.
+- Tracker + lockfile committed/pushed. PRD not yet committed.
+- **Next:** commit `docs/PROJECT_PRD.md`. Then check `package.json` for leftover Bolt SDK / existing Supabase deps (§2) before starting Epic 1 work for real.
+- **Open decision:** none blocking.
 
 ### 2026-08-31
 - Reopened repo after pause. Confirmed `git status` clean except lockfile from `npm install`/`npm audit fix`.
 - Flagged that `ARCHITECTURE.md` is stale (Bolt, not Supabase) and that the original 16-EPIC PRD is not currently locatable.
 - Created this tracker as the canonical resume point.
-- **Next:** locate/reconstruct the PRD (see §2), then start Phase 1 checklist.
-- **Open decision:** none blocking — Supabase is confirmed direction, just need to verify how much of the migration was already done before pause.
