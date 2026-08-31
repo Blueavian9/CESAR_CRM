@@ -1,6 +1,6 @@
 # CESAR/CRM — Project Tracker
 
-> **Read `docs/PROJECT_PRD.md` and this file first, every session, before touching code.**
+> **Read `docs/PRD.md` and this file first, every session, before touching code.**
 > PRD = scope & acceptance criteria (source of truth for *what*). This file = status & log (source of truth for *where things stand*). Don't let them drift — if scope changes, edit the PRD and log the change here.
 > Update the "Last Session Log" section at the end of every work session — even a short one — before ending the conversation.
 
@@ -11,18 +11,19 @@
 - **What it is:** Multi-tenant property management platform (landlords/PMs, tenants, leases, payments, maintenance, screening).
 - **Stack:** React 18 + TypeScript + Vite, Tailwind CSS, Lucide icons.
 - **Backend:** Supabase (Postgres + Auth + Storage + Realtime + RLS) — confirmed direction, replacing the original Bolt.new/Bolt Database scaffold.
-- **Full scope:** `docs/PROJECT_PRD.md` (18 epics, reconstructed — original PRD not located).
-- **Status:** Resuming from pause. Phase 1 (Foundation & Auth / Supabase migration) not yet started this session.
+- **Full scope:** `docs/PRD.md` (18 epics, reconstructed — original PRD not located).
+- **Status:** Resuming from pause. Phase 1 (Foundation & Auth / Supabase migration) not yet started.
 
 ## 2. Open Items
 
-- [ ] Original 16-EPIC PRD still not located (checked: none found yet — see prior session log). Current `docs/PROJECT_PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
+- [ ] Original 16-EPIC PRD still not located. Current `docs/PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
 - [ ] `ARCHITECTURE.md` in repo root is still Bolt-flavored — leave as-is until Epic 1 is functionally complete, then rewrite (see PRD §7).
-- [ ] Confirm current `package.json`: is any Bolt SDK still present? Is `@supabase/supabase-js` already installed? (Determines how far the migration got before pause — check before assuming Epic 1 starts from zero.)
+- [ ] **Immediate next step:** confirm current `package.json` — is any Bolt SDK still present? Is `@supabase/supabase-js` already installed? (Determines whether Epic 1 starts from zero or resumes partway — not yet checked.)
+- [ ] Minor: `tsconfig.app.json` has a deprecated-`baseUrl` warning (TS 6/7). Fix is to delete the `"baseUrl": "."` line — `paths` already resolves relative to the tsconfig file under `moduleResolution: "bundler"`, so nothing depends on it. Not blocking, low priority.
 
 ## 3. Phase / Epic Checklist
 
-Full scope and acceptance criteria for each epic are in `docs/PROJECT_PRD.md` §6. This section tracks completion only — don't duplicate the criteria text here, just check items off as the PRD's stated criteria are met.
+Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This section tracks completion only — don't duplicate the criteria text here, just check items off as the PRD's stated criteria are met.
 
 - [ ] **Epic 1 — Foundation & Auth (Supabase migration)**
   - [ ] Supabase project provisioned/confirmed
@@ -54,18 +55,24 @@ Full scope and acceptance criteria for each epic are in `docs/PROJECT_PRD.md` §
 
 - `npm audit fix` run — 0 vulnerabilities remaining (was 13: 1 low, 1 moderate, 11 high).
 - `docs/PROJECT_TRACKER.md` + lockfile committed and pushed (`ce1b03e`, 2026-08-31).
-- `docs/PROJECT_PRD.md` drafted (reconstructed, 18 epics) — commit pending.
+- `docs/PRD.md` drafted (reconstructed, 18 epics) — commit pending as of last check.
+- `tsconfig.app.json` — deprecated `baseUrl` flagged, fix identified, not yet applied.
 
 ## 5. Last Session Log
 
 *(Most recent entry on top. One entry per session — a few lines is enough: what changed, what's next, any open decision.)*
 
+### 2026-08-31 (session end — handing off to a new Claude session)
+- Reviewed a `tsconfig.app.json` deprecation warning (`baseUrl`) — fix identified (delete the line), not yet applied to the file.
+- Generated a resume prompt for starting a fresh Claude session, pointing it at this tracker + the PRD and instructing it not to re-derive settled decisions (Bolt→Supabase, epic breakdown).
+- **Stopping point:** `docs/PRD.md` commit status unconfirmed — verify it's actually pushed before assuming the new session can read it from the repo. `package.json` Bolt/Supabase dependency check still not done.
+- **Next:** in the new session — (1) confirm PRD is committed/pushed, (2) run the `package.json` check, (3) apply the `tsconfig.app.json` fix if not already done, (4) begin Epic 1 work.
+- **Open decision:** none blocking.
+
 ### 2026-08-31 (cont'd)
-- Drafted full PRD (`docs/PROJECT_PRD.md`) — 18 epics with scope, acceptance criteria, dependency graph. Reconstructed from ARCHITECTURE.md since original PRD wasn't located.
+- Drafted full PRD (`docs/PRD.md`) — 18 epics with scope, acceptance criteria, dependency graph. Reconstructed from ARCHITECTURE.md since original PRD wasn't located.
 - Rewrote this tracker's checklist to mirror the PRD's Epic 1 criteria 1:1 instead of the earlier shorthand version.
 - Tracker + lockfile committed/pushed. PRD not yet committed.
-- **Next:** commit `docs/PROJECT_PRD.md`. Then check `package.json` for leftover Bolt SDK / existing Supabase deps (§2) before starting Epic 1 work for real.
-- **Open decision:** none blocking.
 
 ### 2026-08-31
 - Reopened repo after pause. Confirmed `git status` clean except lockfile from `npm install`/`npm audit fix`.
