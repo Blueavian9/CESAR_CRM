@@ -25,7 +25,7 @@ export const MOCK_TICKETS: Ticket[] = [
   {
     id: "m2",
     title: "Hallway light flickering",
-    propertyName: "Ever Plaza Offices",
+    propertyName: "Cesar Plaza Offices",
     unit: "3F",
     category: "Electrical",
     priority: "medium",
