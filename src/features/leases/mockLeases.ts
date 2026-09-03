@@ -16,7 +16,7 @@ export const MOCK_LEASES: Lease[] = [
   {
     id: "l1",
     code: "LH-202-2023",
-    propertyName: "Ever Hills Apartments",
+    propertyName: "Cesar Hills Apartments",
     unit: "202",
     tenantName: "Maria Lopez",
     startDate: "2023-04-15",
@@ -38,7 +38,7 @@ export const MOCK_LEASES: Lease[] = [
   {
     id: "l3",
     code: "EL-504-MTM",
-    propertyName: "Ever Short-Stay Lofts",
+    propertyName: "Cesar Short-Stay Lofts",
     unit: "504",
     tenantName: "Ana Rodriguez",
     startDate: "2024-12-01",

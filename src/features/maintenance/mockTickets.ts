@@ -15,7 +15,7 @@ export const MOCK_TICKETS: Ticket[] = [
   {
     id: "m1",
     title: "Leaking kitchen sink",
-    propertyName: "Ever Hills Apartments",
+    propertyName: "Cesar Hills Apartments",
     unit: "105",
     category: "Plumbing",
     priority: "high",
