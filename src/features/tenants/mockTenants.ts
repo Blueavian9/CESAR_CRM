@@ -16,7 +16,7 @@ export const MOCK_TENANTS: Tenant[] = [
   {
     id: "t1",
     name: "Maria Lopez",
-    propertyName: "Ever Hills Apartments",
+    propertyName: "Cesar Hills Apartments",
     unit: "202",
     city: "Los Angeles",
     state: "CA",
@@ -38,7 +38,7 @@ export const MOCK_TENANTS: Tenant[] = [
   {
     id: "t3",
     name: "Ana Rodriguez",
-    propertyName: "Ever Short-Stay Lofts",
+    propertyName: "Cesar Short-Stay Lofts",
     unit: "504",
     city: "Los Angeles",
     state: "CA",

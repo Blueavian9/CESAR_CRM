@@ -251,7 +251,7 @@ const NewTicketModal: FC<{
                 setFormData({ ...formData, propertyName: e.target.value })
               }
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g., Ever Hills Apartments"
+              placeholder="e.g., Cesar Hills Apartments"
             />
           </div>
 

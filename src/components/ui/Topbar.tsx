@@ -40,7 +40,7 @@ const Topbar = () => {
           <UserCircle2 className="w-7 h-7 text-slate-500" />
           <div className="hidden md:flex flex-col items-start">
             <span className="text-xs font-medium text-slate-700">
-              Ever Hernandez
+              Cesar Aguilar 
             </span>
             <span className="text-[11px] text-slate-400">
               Property Manager

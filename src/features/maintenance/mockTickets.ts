@@ -35,7 +35,7 @@ export const MOCK_TICKETS: Ticket[] = [
   {
     id: "m3",
     title: "AC filter replacement",
-    propertyName: "Ever Short-Stay Lofts",
+    propertyName: "Cesar Short-Stay Lofts",
     unit: "712",
     category: "HVAC",
     priority: "low",

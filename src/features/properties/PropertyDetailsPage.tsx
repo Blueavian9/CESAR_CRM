@@ -101,7 +101,7 @@ const PropertyDetailsPage: FC = () => {
         <div className="rounded-lg border bg-white p-3">
           <p className="text-xs text-slate-500">Owner</p>
           <p className="mt-1 text-sm font-medium text-slate-900">
-            Ever Hills Investments
+            Cesar Hills Investments
           </p>
           <p className="text-xs text-slate-400">
             (placeholder – real data later)

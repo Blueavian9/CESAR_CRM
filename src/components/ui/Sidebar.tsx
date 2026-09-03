@@ -15,7 +15,7 @@ const Sidebar = () => {
     <aside className="hidden md:flex md:flex-col w-64 border-r bg-white">
       <div className="h-16 flex items-center px-4 border-b">
         <span className="font-semibold text-lg tracking-tight">
-          Ever<span className="text-indigo-600">CRM</span>
+          Cesar<span className="text-indigo-600">CRM</span>
         </span>
       </div>
       <nav className="flex-1 px-2 py-4 space-y-1">

@@ -2,8 +2,8 @@ import type { Property } from "./types";
 
 export const MOCK_PROPERTIES: Property[] = [
   {
-    id: "prop_ever_001",
-    name: "Ever Hills Apartments",
+    id: "prop_cesar_001",
+    name: "Cesar Hills Apartments",
     address: "1234 Ascot Hills Dr",
     city: "Los Angeles",
     state: "CA",
@@ -15,7 +15,7 @@ export const MOCK_PROPERTIES: Property[] = [
     createdAt: "2024-10-01",
   },
   {
-    id: "prop_ever_002",
+    id: "prop_cesar_002",
     name: "Sunset View Duplex",
     address: "502 N Figueroa St",
     city: "Los Angeles",
@@ -28,8 +28,8 @@ export const MOCK_PROPERTIES: Property[] = [
     createdAt: "2024-09-12",
   },
   {
-    id: "prop_ever_003",
-    name: "Ever Plaza Offices",
+    id: "prop_cesar_003",
+    name: "Cesar's Palace Offices",
     address: "900 Huntington Dr",
     city: "Alhambra",
     state: "CA",
@@ -41,8 +41,8 @@ export const MOCK_PROPERTIES: Property[] = [
     createdAt: "2024-08-05",
   },
   {
-    id: "prop_ever_004",
-    name: "Ever Short-Stay Lofts",
+    id: "prop_cesar_004",
+    name: "Cesar Short-Stay Lofts",
     address: "77 Downtown Way",
     city: "Los Angeles",
     state: "CA",
