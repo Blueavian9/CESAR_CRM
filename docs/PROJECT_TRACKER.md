@@ -29,7 +29,9 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
   - [ ] Supabase project provisioned/confirmed
   - [ ] `users`/`organizations` tables + Auth signup wiring
   - [ ] Role model (`admin`/`manager`/`tenant`) enforced via RLS
-  - [ ] Bolt SDK fully removed, `@supabase/supabase-js` centralized client in place
+  - [ ] Bolt SDK fully removed, Supabase also removed; Clerk SDK installed and provider wired in main.tsx. 
+
+  
   - [ ] RLS policy pass across existing tables
   - [ ] Login/signup/forgot-password/tenant-login flows working end-to-end
   - [ ] *All 3 PRD acceptance criteria for Epic 1 verified*
@@ -78,3 +80,9 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 - Reopened repo after pause. Confirmed `git status` clean except lockfile from `npm install`/`npm audit fix`.
 - Flagged that `ARCHITECTURE.md` is stale (Bolt, not Supabase) and that the original 16-EPIC PRD is not currently locatable.
 - Created this tracker as the canonical resume point.
+
+### 2026-09-08
+- Installed @clerk/clerk-react, removed unused @supabase/supabase-js dependency
+- Wrapped app in <ClerkProvider> in src/main.tsx, wired to VITE_CLERK_PUBLISHABLE_KEY
+- Confirmed app boots clean with Clerk loaded (dev-key warning only, expected)
+- Next: build Sign In / Sign Up pages using Clerk's prebuilt components, gate dashboard routes behind auth
