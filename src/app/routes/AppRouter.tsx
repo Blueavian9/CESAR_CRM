@@ -1,5 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "../layout/Layout";
+import RequireAuth from "../../features/auth/RequireAuth";
+import SignInPage from "../../features/auth/SignInPage";
+import SignUpPage from "../../features/auth/SignUpPage";
 import DashboardPage from "../../features/dashboard/DashboardPage";
 import PropertiesPage from "../../features/properties/PropertiesPage";
 import TenantsPage from "../../features/tenants/TenantsPage";
@@ -13,36 +16,29 @@ import PaymentDetailsPage from "../../features/payments/PaymentDetailsPage";
 
 const AppRouter = () => {
   return (
-  <Routes>
-          <Route path="/" element={<Layout />}>
-        {/* When user hits "/", send them to /dashboard */}
-        <Route index element={<Navigate to="dashboard" replace />} />
+    <Routes>
+      {/* Public auth routes */}
+      <Route path="/sign-in/*" element={<SignInPage />} />
+      <Route path="/sign-up/*" element={<SignUpPage />} />
 
-        <Route path="dashboard" element={<DashboardPage />} />
-
-        {/* Properties */}
-        <Route path="properties" element={<PropertiesPage />} />
-        <Route path="properties/:id" element={<PropertyDetailsPage />} />
-
-        {/* Tenants */}
-        <Route path="tenants" element={<TenantsPage />} />
-        <Route path="tenants/:id" element={<TenantDetailsPage />} />
-
-        {/* Leases */}
-        <Route path="leases" element={<LeasesPage />} />
-        <Route path="leases/:id" element={<LeaseDetailsPage />} />
-
-        {/* Payments */}
-        <Route path="payments" element={<PaymentsPage />} />
-        <Route path="payments/:id" element={<PaymentDetailsPage />} />
-
-        {/* Maintenance */}
-        <Route path="maintenance" element={<MaintenancePage />} />
-
-        {/* Fallback for unknown routes */}
-        <Route path="*" element={<Navigate to="dashboard" replace />} />
+      {/* Protected app routes */}
+      <Route element={<RequireAuth />}>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="properties" element={<PropertiesPage />} />
+          <Route path="properties/:id" element={<PropertyDetailsPage />} />
+          <Route path="tenants" element={<TenantsPage />} />
+          <Route path="tenants/:id" element={<TenantDetailsPage />} />
+          <Route path="leases" element={<LeasesPage />} />
+          <Route path="leases/:id" element={<LeaseDetailsPage />} />
+          <Route path="payments" element={<PaymentsPage />} />
+          <Route path="payments/:id" element={<PaymentDetailsPage />} />
+          <Route path="maintenance" element={<MaintenancePage />} />
+          <Route path="*" element={<Navigate to="dashboard" replace />} />
+        </Route>
       </Route>
-</Routes>
+    </Routes>
   );
 };
 

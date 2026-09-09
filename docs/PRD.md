@@ -54,7 +54,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 ## 6. Epics
 
-### Epic 1 — Foundation & Auth (Supabase Migration)
+###  — Foundation & Auth (Supabase Migration)
 **Goal:** Replace Bolt Database with Supabase as the sole backend; establish the org/role/RLS model everything else depends on.
 
 **Scope**
