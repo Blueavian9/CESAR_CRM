@@ -11,19 +11,32 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 ## 2. Key Decision Baked Into This PRD
 
-**Backend is Supabase, not Bolt Database.** `ARCHITECTURE.md` in repo root still names Bolt Database throughout — that's stale. Every epic below assumes Supabase (Postgres + Supabase Auth + Supabase Storage + Realtime + RLS). Schema/routes are otherwise unchanged from ARCHITECTURE.md — this is a backend-provider swap, not a data model redesign.
+**Backend is a free-tier composed stack, not Supabase and not Bolt Database.** `ARCHITECTURE.md` in repo root still names Bolt Database throughout — that's stale, and so is any earlier reference to Supabase in this repo's docs. The confirmed stack, chosen entirely for zero recurring cost with no inactivity-pause risk:
+
+| Concern | Provider | Notes |
+|---|---|---|
+| Auth | **Clerk** | Already installed & wired (`@clerk/clerk-react`, `ClerkProvider` in `main.tsx`) |
+| Database | **Neon** (Postgres) | Free tier, no 7-day inactivity pause (the dealbreaker with Supabase's free tier) |
+| File storage | **Cloudflare R2** | S3-compatible, free tier, no egress fees |
+| Tenant isolation | **Postgres RLS**, with the API setting a per-request session variable | Decided 2026-09-08. See callout below — this is *not* automatic the way Supabase's was; the API must set the session variable itself |
+| Realtime | **None initially — refetch-on-mutate** | No built-in equivalent to Supabase Realtime in this stack; add a dedicated service later only if a specific feature needs true push updates |
+
+> ⚠️ **Important architectural callout, carried through every epic below:** Supabase auto-generated a REST API that enforced Postgres RLS per-request using the caller's JWT. Neon is *just* Postgres — nothing sets per-request org context for you. This stack requires a thin API layer (Vercel serverless functions or a small Node service) that (1) validates the Clerk session, (2) resolves the caller's `organization_id`/role, and (3) sets that as a Postgres session variable (`app.current_org_id`, via `set_config(..., true)` inside each request's transaction) consumed by RLS policies on every table. This is now the confirmed mechanism (decided 2026-09-08) — see `db/migrations/001_schema_and_rls.sql`. It changes the acceptance-testing burden versus Supabase: Epic 17's RLS test suite is covering hand-written policies, not a battle-tested platform default, so treat it as higher-risk and prioritize accordingly. The one gap RLS doesn't cover: the Clerk webhook that creates the very first `organizations`/`users` row on signup has no org context yet, so that code path uses a separate, privileged (`bypassrls`) connection — keep that path minimal and reviewed carefully, it's the one place RLS isn't protecting you.
+
+Schema/routes are otherwise unchanged from ARCHITECTURE.md's original data model — this is a backend-provider swap, not a data model redesign.
 
 ## 3. Non-Goals (for this pass)
 
 - Native mobile apps (PWA only — see Epic 16)
 - Payment gateway selection/integration logic beyond "integration-ready" hooks (Epic 6 wires the schema and stub, doesn't pick/ship a processor)
 - Multi-language/i18n
+- True realtime push updates (deferred — see stack table above)
 
 ## 4. Success Metrics
 
 - A property manager can go from signup → first property → first tenant → first lease → first rent payment logged, end-to-end, with no manual DB intervention.
-- Tenant portal supports the same lease/payment/maintenance visibility with zero write access outside their own records (verified by RLS tests, not just UI hiding).
-- Zero rows in any table reachable by an org that doesn't own them (tenant isolation is the platform's core trust guarantee — treat as a launch blocker, not a nice-to-have).
+- Tenant portal supports the same lease/payment/maintenance visibility with zero write access outside their own records (verified by an actual scoping/RLS test suite, not just UI hiding — see the architectural callout in §2).
+- Zero rows in any table reachable by an org that doesn't own them (tenant isolation is the platform's core trust guarantee — treat as a launch blocker, not a nice-to-have. With no platform-enforced default, this is proven by tests, not assumed from the stack).
 
 ---
 
@@ -31,7 +44,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 | # | Epic | Depends On |
 |---|------|-----------|
-| 1 | Foundation & Auth (Supabase migration) | — |
+| 1 | Foundation & Auth (Clerk + Neon migration) | — |
 | 2 | Dashboard & Properties | 1 |
 | 3 | Tenants & Leads | 1, 2 |
 | 4 | Screening | 3 |
@@ -54,21 +67,22 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 ## 6. Epics
 
-###  — Foundation & Auth (Supabase Migration)
-**Goal:** Replace Bolt Database with Supabase as the sole backend; establish the org/role/RLS model everything else depends on.
+### Epic 1 — Foundation & Auth (Clerk + Neon Migration)
+**Goal:** Replace Bolt Database (and the previously-planned Supabase) with Clerk (auth) + Neon (Postgres) as the backend; establish the org/role/tenant-isolation model everything else depends on.
 
 **Scope**
-- Provision Supabase project (or confirm existing one from before pause)
-- Recreate `users`, `organizations` tables; wire Supabase Auth → `users` profile row on signup
-- Role model: `admin`, `manager`, `tenant` — enforced via RLS, not just client-side checks
-- Replace Bolt SDK calls with `@supabase/supabase-js`; centralize client init (one `supabaseClient.ts`, no ad-hoc instantiation)
-- RLS policy pass: every table scoped to `organization_id` for managers, to own-record for tenants
-- Login/signup/forgot-password/tenant-login flows working end-to-end against Supabase Auth
+- Provision Neon project; confirm connection pooling setup (Neon's pooler vs. direct connection) for serverless/Vercel deployment
+- Recreate `users`, `organizations` tables in Neon; wire Clerk webhook (`user.created`) → create matching `users`/`organizations` rows, no orphaned Clerk users
+- Role model: `admin`, `manager`, `tenant` — stored on the `users` row, resolved via Clerk's session/JWT claims or a DB lookup keyed by `clerk_user_id`
+- Implement the isolation mechanism decided in §2: Postgres RLS, with the API layer setting `app.current_org_id` via `set_config(..., true)` inside each request's transaction. Schema + policies live in `db/migrations/001_schema_and_rls.sql`.
+- Build the thin API layer (Vercel serverless functions recommended, matching existing Vite/React deploy target) that all client data access routes through — no direct client-to-Neon queries
+- Login/signup/forgot-password/tenant-login flows working end-to-end against Clerk, with the API layer correctly resolving org/role on every request
 
 **Acceptance Criteria**
-- [ ] A brand-new signup creates an `organizations` row + `users` row with `role = manager`, no orphaned auth users
-- [ ] A tenant user can authenticate but is blocked by RLS (not just routing) from any `/properties`, `/settings`, etc. queries
-- [ ] No Bolt SDK imports remain anywhere in the codebase (`grep -r "bolt" src/` returns nothing)
+- [ ] A brand-new Clerk signup creates an `organizations` row + `users` row with `role = manager`, no orphaned Clerk users
+- [ ] A tenant user can authenticate but is blocked — at the API/query layer, not just by routing — from any `/properties`, `/settings`, etc. data
+- [ ] No Bolt SDK or Supabase SDK imports remain anywhere in the codebase (`grep -rE "bolt|supabase" src/` returns nothing)
+- [ ] The chosen isolation mechanism (RLS-with-session-context vs. query-layer scoping) is documented in this file and has at least one automated test proving cross-org access fails
 
 **Dependencies:** None — this blocks everything else.
 
@@ -78,13 +92,13 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 **Goal:** Manager landing experience + property CRUD, the first "real" screen after login.
 
 **Scope**
-- Dashboard KPI cards (properties, active leases, vacant units, overdue payments) — real queries, not placeholders
+- Dashboard KPI cards (properties, active leases, vacant units, overdue payments) — real queries through the API layer, not placeholders
 - Properties list/filter, create/edit, property detail with Overview/Units/Tenants/Financials/Maintenance/Documents/Settings tabs (tabs can stub until their owning epic lands)
 - Units CRUD nested under properties, vacancy status tracking
 
 **Acceptance Criteria**
-- [ ] KPI cards reflect live Supabase counts, scoped to the logged-in org
-- [ ] Creating a property → creating a unit under it → both show up in list views without refresh (Realtime or refetch-on-mutate, your call)
+- [ ] KPI cards reflect live Neon counts, scoped to the logged-in org
+- [ ] Creating a property → creating a unit under it → both show up in list views without refresh (since there's no Realtime layer, this means refetch-on-mutate, not a live subscription)
 
 **Dependencies:** Epic 1
 
@@ -127,7 +141,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 **Scope**
 - `/leases` (active/expiring/expired), `/leases/new`, `/leases/:id`
 - Lease ↔ unit ↔ tenant linkage; terms, dates, rent/deposit amounts
-- Document attachment (signed lease file) — hooks into Epic 11
+- Document attachment (signed lease file) — hooks into Epic 11 (Cloudflare R2)
 
 **Acceptance Criteria**
 - [ ] "Expiring soon" view is date-driven (e.g., ≤60 days to `end_date`), not manually flagged
@@ -158,11 +172,11 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 **Scope**
 - `/maintenance` (all/open/in-progress/completed), `/maintenance/new`, `/maintenance/:id`
-- Priority/category, image attachments, assignment
+- Priority/category, image attachments (Cloudflare R2), assignment
 - Feeds tenant portal (Epic 9) for tenant-side visibility/creation
 
 **Acceptance Criteria**
-- [ ] A tenant-submitted request appears in the manager's `/maintenance` queue in real time or on next load, correctly scoped to their org
+- [ ] A tenant-submitted request appears in the manager's `/maintenance` queue on next load (no Realtime layer — refetch-on-mutate or polling), correctly scoped to their org
 
 **Dependencies:** Epic 3
 
@@ -173,7 +187,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 **Scope**
 - `/communications` inbox/sent/templates/automated
-- `notifications` table + UI bell/center
+- `notifications` table + UI bell/center (polled, not pushed — see stack table in §2)
 - Trigger points: lease expiring soon, payment overdue, maintenance status change (wire the triggers here even though the fuller automation engine is Epic 13)
 
 **Acceptance Criteria**
@@ -184,13 +198,13 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 ---
 
 ### Epic 9 — Tenant Portal
-**Goal:** Self-service experience for tenants, RLS-verified.
+**Goal:** Self-service experience for tenants, isolation-verified.
 
 **Scope**
 - `/tenant-portal`: dashboard, my lease, payment history, pay rent (integration-ready stub), submit/view maintenance requests, documents, messages
 
 **Acceptance Criteria**
-- [ ] Every query on this portal is provably scoped by RLS to the authenticated tenant's own records — write an actual RLS test for this, don't rely on UI filtering
+- [ ] Every query on this portal is provably scoped by the API layer to the authenticated tenant's own records — write an actual test for this (RLS-context test or query-scoping test, per whichever mechanism Epic 1 settled on), don't rely on UI filtering
 
 **Dependencies:** Epics 5, 6, 7, 8
 
@@ -201,7 +215,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 **Scope**
 - `/reports` with report-type selector, custom report builder, CSV/export
-- Pulls from Epics 2, 5, 6, 7 data — no new tables, mostly query/aggregation work
+- Pulls from Epics 2, 5, 6, 7 data via the API layer — no new tables, mostly query/aggregation work
 
 **Acceptance Criteria**
 - [ ] Every report is org-scoped and matches manual spot-check totals against the source tables
@@ -211,14 +225,14 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 ---
 
 ### Epic 11 — Document Management
-**Goal:** Centralized file storage, replacing Bolt Storage with Supabase Storage buckets.
+**Goal:** Centralized file storage on Cloudflare R2, replacing Bolt Storage (and the previously-planned Supabase Storage).
 
 **Scope**
-- `/documents`, `/documents/upload`; `documents` table (`related_type`/`related_id` polymorphic link)
-- Supabase Storage bucket structure + per-org access policies (mirrors RLS pattern from Epic 1)
+- `/documents`, `/documents/upload`; `documents` table (`related_type`/`related_id` polymorphic link) in Neon
+- Cloudflare R2 bucket structure + per-org access enforced via signed URLs issued by the API layer (R2 has no built-in per-row policy engine like Supabase Storage did — access control lives entirely in the API layer that mints signed URLs)
 
 **Acceptance Criteria**
-- [ ] A document uploaded under one org is not retrievable via signed URL guessing or direct bucket path by another org's users
+- [ ] A document uploaded under one org is not retrievable by another org's users — neither by guessing the R2 object key nor by requesting a signed URL through the API for an object outside their org
 
 **Dependencies:** Epic 1
 
@@ -229,11 +243,11 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 **Scope**
 - `audit_logs` table wired to key mutations (tenant status changes, lease creation, payment status changes, user role changes)
-- RLS policy audit across all tables (re-verify Epic 1's baseline still holds after Epics 2–11 added tables/columns)
-- Basic rate-limiting/input-validation pass on public-facing forms (signup, tenant-login)
+- Full audit of the isolation mechanism chosen in Epic 1 — re-verify it still holds after Epics 2–11 added tables/columns/routes (this audit matters more in this stack than it would have under Supabase, since there's no platform-level default to fall back on)
+- Basic rate-limiting/input-validation pass on public-facing forms and on the API layer itself (signup, tenant-login, file upload endpoints)
 
 **Acceptance Criteria**
-- [ ] Every table with tenant-sensitive data has an RLS policy — produce a checklist/table mapping table → policy → verified (not just "exists")
+- [ ] Every table with tenant-sensitive data has an isolation mechanism (RLS policy or enforced query-layer scoping) — produce a checklist/table mapping table → mechanism → verified (not just "exists")
 
 **Dependencies:** Epics 1, 11
 
@@ -247,7 +261,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 - Automated late-fee flagging (flagging only — no charge processing, per Non-Goals)
 
 **Acceptance Criteria**
-- [ ] At least the lease-expiry and payment-overdue automations run on a schedule (Supabase scheduled functions / cron) without manual trigger
+- [ ] At least the lease-expiry and payment-overdue automations run on a schedule (Vercel Cron or equivalent free scheduled-function option) without manual trigger
 
 **Dependencies:** Epics 6, 7, 8
 
@@ -257,11 +271,11 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 **Goal:** External-facing API + webhook/Zapier hooks for `/settings` → Integration settings.
 
 **Scope**
-- API key issuance/management per org
+- API key issuance/management per org, validated by the same API layer used internally
 - Webhook config UI + delivery for key events (new lead, lease signed, payment received)
 
 **Acceptance Criteria**
-- [ ] An API key scoped to one org cannot read another org's data (same RLS guarantee, exercised via the API surface, not just the app)
+- [ ] An API key scoped to one org cannot read another org's data (same isolation guarantee as Epic 1/12, exercised via the external API surface, not just the app)
 
 **Dependencies:** Epics 1, 12
 
@@ -289,9 +303,9 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 ---
 
 ### Epic 17 — Testing & QA
-**Goal:** Coverage sufficient to trust the RLS/multi-tenancy guarantees under load, not just happy-path UI.
+**Goal:** Coverage sufficient to trust the isolation guarantees under load, not just happy-path UI. Higher priority than it would be under a managed platform, since this stack's tenant isolation is hand-built (see §2).
 
-**Scope:** RLS policy test suite (per-table, per-role), critical-path E2E (signup → lease → payment), regression suite before each release.
+**Scope:** Isolation/scoping test suite (per-table, per-role — RLS-context or query-layer, matching Epic 1's mechanism), critical-path E2E (signup → lease → payment), regression suite before each release.
 
 **Dependencies:** All prior epics (run continuously, formalize before launch)
 
@@ -300,7 +314,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 ### Epic 18 — Deployment & Launch
 **Goal:** Production cutover.
 
-**Scope:** Environment config (Supabase prod project, secrets), CI/CD pipeline, rollback plan, launch checklist tying back to Epic 17's test suite.
+**Scope:** Environment config (Neon prod branch, Clerk prod instance, R2 prod bucket, secrets), CI/CD pipeline, rollback plan, launch checklist tying back to Epic 17's test suite.
 
 **Dependencies:** Epic 17
 
@@ -311,3 +325,4 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 - This PRD is the scope reference. `docs/PROJECT_TRACKER.md` is the status log. Don't duplicate status into this file — link between them.
 - When an epic's acceptance criteria are met, check it off in the tracker's phase checklist and note the session log entry there, not here.
 - If real requirements diverge from an epic as written here (they will), edit *this* file and note the change in the tracker's log so the divergence is traceable.
+- The isolation mechanism is now decided (Postgres RLS, §2) — every later epic's acceptance criteria assume this is settled going forward.
