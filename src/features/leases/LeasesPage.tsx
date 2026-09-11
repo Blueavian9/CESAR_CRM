@@ -90,15 +90,21 @@ const LeasesPage: FC = () => {
                           "bg-emerald-50 text-emerald-700 border border-emerald-100",
                         lease.status === "pending" &&
                           "bg-amber-50 text-amber-700 border border-amber-100",
-                        lease.status === "ended" &&
+                        lease.status === "expiring" &&
+                          "bg-orange-50 text-orange-700 border border-orange-100",
+                        lease.status === "expired" &&
                           "bg-slate-100 text-slate-600 border border-slate-200",
+                        lease.status === "terminated" &&
+                          "bg-rose-50 text-rose-700 border border-rose-100",
                       ]
                         .filter(Boolean)
                         .join(" ")}
                     >
                       {lease.status === "active" && "Active"}
                       {lease.status === "pending" && "Pending"}
-                      {lease.status === "ended" && "Ended"}
+                      {lease.status === "expiring" && "Expiring"}
+                      {lease.status === "expired" && "Expired"}
+                      {lease.status === "terminated" && "Terminated"}
                     </span>
                   </td>
                   <td className="px-4 py-2 align-middle text-right">

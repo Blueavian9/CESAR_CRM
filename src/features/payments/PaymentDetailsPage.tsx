@@ -65,12 +65,16 @@ const PaymentDetailsPage: FC = () => {
         <span
           className={[
             "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize",
-            payment.status === "completed" &&
+            payment.status === "paid" &&
               "bg-emerald-50 text-emerald-700 border border-emerald-100",
             payment.status === "pending" &&
               "bg-amber-50 text-amber-700 border border-amber-100",
             payment.status === "failed" &&
               "bg-rose-50 text-rose-700 border border-rose-100",
+            payment.status === "overdue" &&
+              "bg-orange-50 text-orange-700 border border-orange-100",
+            payment.status === "refunded" &&
+              "bg-slate-100 text-slate-600 border border-slate-200",
           ]
             .filter(Boolean)
             .join(" ")}
