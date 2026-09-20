@@ -10,23 +10,23 @@
 
 - **What it is:** Multi-tenant property management platform (landlords/PMs, tenants, leases, payments, maintenance, screening).
 - **Stack:** React 18 + TypeScript + Vite, Tailwind CSS, Lucide icons.
-- **Backend:** Supabase (Postgres + Auth + Storage + Realtime + RLS) — confirmed direction, replacing the original Bolt.new/Bolt Database scaffold.
+- **Backend:** Clerk (Auth) + Neon (Postgres, RLS-enforced) + Cloudflare R2 (storage) -- replacing the original Bolt.new/Bolt Database scaffold.
 - **Full scope:** `docs/PRD.md` (18 epics, reconstructed — original PRD not located).
-- **Status:** Resuming from pause. Phase 1 (Foundation & Auth / Supabase migration) not yet started.
+- **Status:** Mid-Epic 1 (Foundation & Auth). Clerk installed and wired; Neon schema + RLS live and force-enforced; TypeScript clean. Sign In/Sign Up UI and the Clerk webhook not yet built.
 
 ## 2. Open Items
 
 - [ ] Original 16-EPIC PRD still not located. Current `docs/PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
 - [ ] `ARCHITECTURE.md` in repo root is still Bolt-flavored — leave as-is until Epic 1 is functionally complete, then rewrite (see PRD §7).
-- [ ] **Immediate next step:** confirm current `package.json` — is any Bolt SDK still present? Is `@supabase/supabase-js` already installed? (Determines whether Epic 1 starts from zero or resumes partway — not yet checked.)
+
 - [ ] Minor: `tsconfig.app.json` has a deprecated-`baseUrl` warning (TS 6/7). Fix is to delete the `"baseUrl": "."` line — `paths` already resolves relative to the tsconfig file under `moduleResolution: "bundler"`, so nothing depends on it. Not blocking, low priority.
 
 ## 3. Phase / Epic Checklist
 
 Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This section tracks completion only — don't duplicate the criteria text here, just check items off as the PRD's stated criteria are met.
 
-- [ ] **Epic 1 — Foundation & Auth (Supabase migration)**
-  - [ ] Supabase project provisioned/confirmed
+- [ ] **Epic 1 — Foundation & Auth (Clerk + Neon migration)**
+  - [X] Neon project provisioned/confirmed
   - [ ] `users`/`organizations` tables + Auth signup wiring
   - [ ] Role model (`admin`/`manager`/`tenant`) enforced via RLS
   - [ ] Bolt SDK fully removed, Supabase also removed; Clerk SDK installed and provider wired in main.tsx. 
@@ -63,6 +63,14 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 ## 5. Last Session Log
 
 *(Most recent entry on top. One entry per session — a few lines is enough: what changed, what's next, any open decision.)*
+
+
+### 2026-09-20
+- Verified via query against `pg_class` that all 5 core tables (`organizations`, `users`, `properties`, `units`, `tenants`) have both `relrowsecurity` and `relforcerowsecurity` = true in the live Neon "production" branch.
+- Confirmed the earlier Vercel build failure (commit `09c08ad`, TS status-comparison errors) was stale — current HEAD (`6dce434`) already contains the TypeScript fixes; redeploy needed to clear it.
+- Identified that `db/migrations/001_schema_and_rls.sql` in the repo still lacks the `force row level security` lines that are already live in Neon — pending edit, not yet committed.
+- **Next:** decide whether tenant-vs-manager role isolation should be enforced at the RLS policy level (new `app.current_role` session var) or left as an API-layer-only check, before starting Sign In/Sign Up UI work.
+
 
 ### 2026-08-31 (session end — handing off to a new Claude session)
 - Reviewed a `tsconfig.app.json` deprecation warning (`baseUrl`) — fix identified (delete the line), not yet applied to the file.
