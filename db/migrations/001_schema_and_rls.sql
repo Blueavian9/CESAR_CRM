@@ -92,12 +92,11 @@ alter table properties enable row level security;
 alter table units enable row level security;
 alter table tenants enable row level security;
 
-alter table organizations  force row level security;
+alter table organizations force row level security;
 alter table users force row level security;
 alter table properties force row level security;
 alter table units force row level security;
 alter table tenants force row level security;
-
 
 -- organizations: a user can only see their own org row
 create policy org_isolation on organizations

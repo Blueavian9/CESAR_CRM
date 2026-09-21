@@ -10,9 +10,9 @@
 
 - **What it is:** Multi-tenant property management platform (landlords/PMs, tenants, leases, payments, maintenance, screening).
 - **Stack:** React 18 + TypeScript + Vite, Tailwind CSS, Lucide icons.
-- **Backend:** Clerk (Auth) + Neon (Postgres, RLS-enforced) + Cloudflare R2 (storage) -- replacing the original Bolt.new/Bolt Database scaffold.
+- **Backend:** Clerk (Auth) + Neon (Postgres, RLS-enforced) + Cloudflare R2 (storage) — replacing the original Bolt.new/Bolt Database scaffold.
 - **Full scope:** `docs/PRD.md` (18 epics, reconstructed — original PRD not located).
-- **Status:** Mid-Epic 1 (Foundation & Auth). Clerk installed and wired; Neon schema + RLS live and force-enforced; TypeScript clean. Sign In/Sign Up UI and the Clerk webhook not yet built.
+- **Status:** Mid-Epic 1 (Foundation & Auth). Clerk installed and wired; Neon schema + RLS live and force-enforced; TypeScript build clean. Sign In/Sign Up UI and the Clerk `user.created` webhook not yet built.
 
 ## 2. Open Items
 
@@ -26,7 +26,7 @@
 Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This section tracks completion only — don't duplicate the criteria text here, just check items off as the PRD's stated criteria are met.
 
 - [ ] **Epic 1 — Foundation & Auth (Clerk + Neon migration)**
-  - [X] Neon project provisioned/confirmed
+  - [x] Neon project provisioned/confirmed
   - [ ] `users`/`organizations` tables + Auth signup wiring
   - [ ] Role model (`admin`/`manager`/`tenant`) enforced via RLS
   - [ ] Bolt SDK fully removed, Supabase also removed; Clerk SDK installed and provider wired in main.tsx. 
@@ -67,8 +67,8 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 
 ### 2026-09-20
 - Verified via query against `pg_class` that all 5 core tables (`organizations`, `users`, `properties`, `units`, `tenants`) have both `relrowsecurity` and `relforcerowsecurity` = true in the live Neon "production" branch.
-- Confirmed the earlier Vercel build failure (commit `09c08ad`, TS status-comparison errors) was stale — current HEAD (`6dce434`) already contains the TypeScript fixes; redeploy needed to clear it.
-- Identified that `db/migrations/001_schema_and_rls.sql` in the repo still lacks the `force row level security` lines that are already live in Neon — pending edit, not yet committed.
+- Confirmed the earlier Vercel build failure (commit `09c08ad`, "npm run build" TS errors) was stale — current HEAD is a different commit that already contains the TypeScript fixes.
+- Added FORCE ROW LEVEL SECURITY to `db/migrations/001_schema_and_rls.sql` to match the live database (see commit above).
 - **Next:** decide whether tenant-vs-manager role isolation should be enforced at the RLS policy level (new `app.current_role` session var) or left as an API-layer-only check, before starting Sign In/Sign Up UI work.
 
 
