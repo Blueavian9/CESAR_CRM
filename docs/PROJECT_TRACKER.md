@@ -28,7 +28,7 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 - [ ] **Epic 1 — Foundation & Auth (Clerk + Neon migration)**
   - [x] Neon project provisioned/confirmed
   - [ ] `users`/`organizations` tables + Auth signup wiring
-  - [ ] Role model (`admin`/`manager`/`tenant`) enforced via RLS
+  - [x] Role model (`admin`/`manager`/`tenant`) enforced via RLS
   - [ ] Bolt SDK fully removed, Supabase also removed; Clerk SDK installed and provider wired in main.tsx. 
 
   
@@ -69,7 +69,13 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 - Verified via query against `pg_class` that all 5 core tables (`organizations`, `users`, `properties`, `units`, `tenants`) have both `relrowsecurity` and `relforcerowsecurity` = true in the live Neon "production" branch.
 - Confirmed the earlier Vercel build failure (commit `09c08ad`, "npm run build" TS errors) was stale — current HEAD is a different commit that already contains the TypeScript fixes.
 - Added FORCE ROW LEVEL SECURITY to `db/migrations/001_schema_and_rls.sql` to match the live database (see commit above).
-- **Next:** decide whether tenant-vs-manager role isolation should be enforced at the RLS policy level (new `app.current_role` session var) or left as an API-layer-only check, before starting Sign In/Sign Up UI work.
+
+### 2026-09-21
+- Added `current_app_role()`; replaced `properties_isolation`, `units_isolation`, and `tenants_isolation` with role-aware `using` and `with check` clauses that exclude the `tenant` role.
+- Verified via `pg_policies` that all three policies show `current_app_role() <> 'tenant'` in both clauses; committed as `3c838f2`.
+- The reserved-keyword gotcha was caught: `current_role` is a PostgreSQL built-in, so the function is named `current_app_role()` instead.
+- No PRD changes are needed until the automated cross-org/cross-role RLS test exists.
+- **Next:** write the automated cross-org/cross-role RLS test before starting the Sign In/Sign Up UI or Clerk webhook, then gate dashboard routes behind auth and build the `user.created` webhook with a separate `bypassrls` connection.
 
 
 ### 2026-08-31 (session end — handing off to a new Claude session)
