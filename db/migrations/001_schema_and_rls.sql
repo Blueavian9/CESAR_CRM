@@ -102,6 +102,11 @@ alter table tenants force row level security;
 create policy org_isolation on organizations
   using (id = current_org_id());
 
+
+create or replace function current_app_role() returns text as $$
+select nullif(current_setting('app.current_role', true), '');
+$$ language sql stable;
+
 -- users: scoped to org, EXCEPT tenants should only see their own row
 -- (tenant-level row restriction handled at the app layer for now —
 -- revisit if you want a stricter policy once tenant portal work starts)
@@ -109,17 +114,16 @@ create policy users_isolation on users
   using (organization_id = current_org_id());
 
 create policy properties_isolation on properties
-  using (organization_id = current_org_id())
-  with check (organization_id = current_org_id());
+  using (organization_id = current_org_id() and current_app_role() != 'tenant')
+  with check (organization_id = current_org_id() and current_app_role() != 'tenant');
 
 create policy units_isolation on units
-  using (organization_id = current_org_id())
-  with check (organization_id = current_org_id());
+  using (organization_id = current_org_id() and current_app_role() != 'tenant')
+  with check (organization_id = current_org_id() and current_app_role() != 'tenant');
 
 create policy tenants_isolation on tenants
-  using (organization_id = current_org_id())
-  with check (organization_id = current_org_id());
-
+  using (organization_id = current_org_id() and current_app_role() != 'tenant')
+  with check (organization_id = current_org_id() and current_app_role() != 'tenant');
 -- ============================================================
 -- 4. Notes for extending this to the rest of the schema
 -- ============================================================
