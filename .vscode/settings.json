@@ -1,0 +1,5 @@
+{
+    "files.associations": {
+        "db/migrations/*.sql": "sql"
+    }
+}
