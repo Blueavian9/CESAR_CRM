@@ -1,7 +1,11 @@
 # CESAR/CRM — Product Requirements Document
 
 **Status:** Reconstructed — original PRD not located. This supersedes it as source of truth.
-**Companion doc:** `docs/PROJECT_TRACKER.md` (session-to-session status log — update that, not this, after each work session)
+**Companion doc:**
+
+`docs/CONSTITUTION.md` (mission, stack, and non-negotiable constraints -- read that first).
+
+ `docs/PROJECT_TRACKER.md` (session-to-session status log — update that, not this, after each work session).
 
 ---
 

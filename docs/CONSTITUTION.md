@@ -36,8 +36,7 @@ notes on extending it.
 
 **One exception to "RLS protects everything":** the Clerk `user.created`
 webhook creates the first `organizations`/`users` row with no org context
-yet. That code path uses a separate, privileged (non-RLS-bypassing... wait,
-bypassing) connection, kept minimal and reviewed carefully.
+yet. That code path uses a separate Postgres role with BYPASSRLS, kept, minimal and reviewed carefully, 
 
 ## Roadmap
 
