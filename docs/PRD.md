@@ -75,6 +75,8 @@ Schema/routes are otherwise unchanged from ARCHITECTURE.md's original data model
 **Goal:** Replace Bolt Database (and the previously-planned Supabase) with Clerk (auth) + Neon (Postgres) as the backend; establish the org/role/tenant-isolation model everything else depends on.
 
 **Scope**
+- **Known state as of EPIC 1:** existing `/properties` UI and dashboard KPI cards currently render hardcore mock data, not live queries - this epic's first acceptance criterion (live Neon counts, real queries) directly replaces that. Confirm `/tenants`, `/leases`, `/payments` for the same pattern before their owning epics begin. 
+ 
 - Provision Neon project; confirm connection pooling setup (Neon's pooler vs. direct connection) for serverless/Vercel deployment
 - Recreate `users`, `organizations` tables in Neon; wire Clerk webhook (`user.created`) → create matching `users`/`organizations` rows, no orphaned Clerk users
 - Role model: `admin`, `manager`, `tenant` — stored on the `users` row, resolved via Clerk's session/JWT claims or a DB lookup keyed by `clerk_user_id`

@@ -1,15 +1,25 @@
 # CESAR/CRM – Application Architecture
 
+> Stack and isolation mechanism here must match `docs/CONSTITUTION.md`.
+> If they ever diverge, the Constitution wins — update this file, not the other way around.
+
 ## 1. Technology Stack
 
 - **Frontend:** React 18, TypeScript, Vite
 - **Styling:** Tailwind CSS
 - **Icons:** Lucide React
-- **Database:** Bolt Database (PostgreSQL)
-- **Auth:** Bolt Database Auth
-- **Storage:** Bolt Database Storage (documents, photos)
-- **Real-time:** Bolt Database real-time subscriptions
-- **API:** Bolt Database REST API with Row Level Security (RLS)
+- **Auth:** Clerk (`@clerk/clerk-react`, `ClerkProvider` wired in `main.tsx`)
+- **Database:** Neon (Postgres), free tier, no inactivity pause
+- **Storage:** Cloudflare R2 (S3-compatible), for documents/photos — Epic 11
+- **Real-time:** None — refetch-on-mutate (see Constitution; add a dedicated service later only if a specific feature needs true push updates)
+- **API layer:** Thin serverless functions (Vercel), all client data access routes through this — no direct client-to-Neon queries
+- **Tenant isolation:** Postgres Row Level Security (RLS), with the API layer setting `app.current_org_id` and `app.current_role` as per-transaction session variables (`set_config(..., true)`). See `db/migrations/001_schema_and_rls.sql` for the live pattern.
+
+> ⚠️ Unlike a platform like Supabase, Neon does not auto-enforce RLS per-request from a caller's JWT. The API layer is responsible for validating the Clerk session, resolving `organization_id`/role, and setting the session variable inside the same transaction as the query. This is a hand-built mechanism — treat RLS policy correctness as a standing risk, not a solved problem (see `docs/PRD.md` §17, Testing & QA).
+
+**Roles in the database (as of Epic 1):**
+- `neondb_owner` — full privileges, `BYPASSRLS`. Used only for migrations and the Clerk `user.created` webhook's initial org/user row creation (the one code path RLS can't cover, since there's no org context yet on signup).
+- `app_user` — `NOBYPASSRLS`, standard CRUD grants. Used by the API layer for all normal request-scoped queries. This is the role RLS policies are actually tested against.
 
 ---
 
@@ -126,9 +136,13 @@
 
 ## 3. Database Schema (Core Tables)
 
-### `users` (Bolt Auth extended)
+Live, canonical schema is `db/migrations/001_schema_and_rls.sql` — the tables below reflect its current state (`organizations`, `users`, `properties`, `units`, `tenants`) plus tables planned for later epics, not yet created.
+
+### `users`
 
 - `id`
+- `clerk_user_id` (links to Clerk's user id, unique)
+- `organization_id`
 - `email`
 - `role` (`admin`, `manager`, `tenant`)
 - `full_name`
@@ -157,19 +171,20 @@
 - `property_type`
 - `units_count`
 - `description`
-- `images` (array or JSONB)
+- `images` (JSONB)
 - `created_at`
 
 ### `units`
 
 - `id`
+- `organization_id` (denormalized for RLS — see migration notes)
 - `property_id`
 - `unit_number`
 - `bedrooms`
 - `bathrooms`
 - `sqft`
 - `rent_amount`
-- `status` (vacant, occupied, offline, etc.)
+- `status` (vacant, occupied, etc.)
 - `created_at`
 
 ### `tenants`
@@ -185,151 +200,13 @@
 - `emergency_contact`
 - `created_at`
 
-### `leads`
-
-- `id`
-- `organization_id`
-- `name`
-- `email`
-- `phone`
-- `status`
-- `source`
-- `notes`
-- `interested_unit_id`
-- `created_at`
-
-### `applications`
-
-- `id`
-- `lead_id`
-- `unit_id`
-- `status`
-- `submitted_at`
-- `employment_info`
-- `references`
-- `income`
-- `created_at`
-
-### `screenings`
-
-- `id`
-- `application_id`
-- `credit_score`
-- `background_check`
-- `eviction_history`
-- `status`
-- `report_data` (JSONB)
-- `created_at`
-
-### `leases`
-
-- `id`
-- `unit_id`
-- `tenant_id`
-- `start_date`
-- `end_date`
-- `rent_amount`
-- `deposit_amount`
-- `status`
-- `terms`
-- `document_url`
-- `created_at`
-
-### `payments`
-
-- `id`
-- `lease_id`
-- `tenant_id`
-- `amount`
-- `due_date`
-- `paid_date`
-- `status`
-- `payment_method`
-- `transaction_id`
-- `created_at`
-
-### `maintenance_requests`
-
-- `id`
-- `unit_id`
-- `tenant_id`
-- `title`
-- `description`
-- `priority`
-- `status`
-- `category`
-- `images` (JSONB)
-- `assigned_to`
-- `created_at`
-
-### `communications`
-
-- `id`
-- `from_user_id`
-- `to_user_id`
-- `subject`
-- `message`
-- `type`
-- `status`
-- `read_at`
-- `created_at`
-
-### `documents`
-
-- `id`
-- `related_type` (property, unit, tenant, lease, etc.)
-- `related_id`
-- `title`
-- `file_url`
-- `file_type`
-- `uploaded_by`
-- `created_at`
-
-### `notifications`
-
-- `id`
-- `user_id`
-- `type`
-- `title`
-- `message`
-- `read`
-- `action_url`
-- `created_at`
-
-### `audit_logs`
-
-- `id`
-- `user_id`
-- `action`
-- `table_name`
-- `record_id`
-- `changes` (JSONB)
-- `created_at`
+> The following tables (`leads`, `applications`, `screenings`, `leases`, `payments`, `maintenance_requests`, `communications`, `documents`, `notifications`, `audit_logs`) are planned per their owning epics (PRD §5–6) but not yet created in Neon. Each will follow the same pattern documented in `001_schema_and_rls.sql`'s closing notes: an `organization_id` column, RLS enabled + forced, and an isolation policy matching the existing shape.
 
 ---
 
 ## 4. Implementation Phases (High Level)
 
-1. **Foundation & Auth**
-2. **Dashboard & Properties**
-3. **Tenants & Leads**
-4. **Screening**
-5. **Leases**
-6. **Payments & Rent Collection**
-7. **Maintenance Requests**
-8. **Communications & Notifications**
-9. **Tenant Portal**
-10. **Reporting & Analytics**
-11. **Document Management**
-12. **Security & Compliance**
-13. **Automation & Workflows**
-14. **Integrations & API**
-15. **SEO & Performance**
-16. **Mobile & PWA**
-17. **Testing & QA**
-18. **Deployment & Launch**
-
-Each phase can be shipped iteratively as a milestone.
+See `docs/PRD.md` §5 (Epic Index) for the authoritative list, dependencies, and acceptance criteria. Current status: `docs/PROJECT_TRACKER.md`.
 
 ---
 

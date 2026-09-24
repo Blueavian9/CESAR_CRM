@@ -15,6 +15,7 @@
 - **Status:** Mid-Epic 1 (Foundation & Auth). Clerk installed and wired; Neon schema + RLS live and force-enforced; TypeScript build clean. Sign In/Sign Up UI and the Clerk `user.created` webhook not yet built.
 
 ## 2. Open Items
+- [ ] Current UI (`/properties`, dashboard KPIs, likely `/tenants`, `/leases`, `/payments`) renders hardcoded mock arrays, not live data - confirmed via screenshot 2026-09-25. This is expected pre-Epic-2 scaffolding, not a regression, but must be swapped for real API-layer calls as part of Epic 2's acceptance criteria (already specified: "real queries through the API layer, not placeholders"). Do no build new features on top of the mock arrays - build against the real API client shape even if the backend isn't wired yet. 2026-09-24. 
 
 - [ ] Original 16-EPIC PRD still not located. Current `docs/PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
 - [ ] `ARCHITECTURE.md` in repo root is still Bolt-flavored — leave as-is until Epic 1 is functionally complete, then rewrite (see PRD §7).
@@ -32,9 +33,9 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
   - [ ] Bolt SDK fully removed, Supabase also removed; Clerk SDK installed and provider wired in main.tsx. 
 
   
-  - [ ] RLS policy pass across existing tables
-  - [ ] Login/signup/forgot-password/tenant-login flows working end-to-end
-  - [ ] *All 3 PRD acceptance criteria for Epic 1 verified*
+- [ ] RLS policy pass across existing tables
+- [ ] Login/signup/forgot-password/tenant-login flows working end-to-end
+- [ ] *All 3 PRD acceptance criteria for Epic 1 verified*
 - [ ] **Epic 2 — Dashboard & Properties**
 - [ ] **Epic 3 — Tenants & Leads**
 - [ ] **Epic 4 — Screening**
@@ -69,6 +70,13 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 - Verified via query against `pg_class` that all 5 core tables (`organizations`, `users`, `properties`, `units`, `tenants`) have both `relrowsecurity` and `relforcerowsecurity` = true in the live Neon "production" branch.
 - Confirmed the earlier Vercel build failure (commit `09c08ad`, "npm run build" TS errors) was stale — current HEAD is a different commit that already contains the TypeScript fixes.
 - Added FORCE ROW LEVEL SECURITY to `db/migrations/001_schema_and_rls.sql` to match the live database (see commit above).
+
+### 2026-09-25
+- Resolved a multi-hour credential incident: `neondb_owner` and `app_user` passwords both went through several failed rotation attempts (clipboard auto-capture from terminal selections, bash quoting issues) before landing on a reliable method — VS Code editor-pane paste for the owner role, and a fully self-contained Node script (generates its own password, no human paste step) for `app_user`. Both roles now confirmed working via live connection test.
+- Wrote `docs/CONSTITUTION.md` (mission, stack, roadmap pointer) and cross-linked it from PRD.md §"Companion doc". Committed as `705865c`.
+- Rewrote `ARCHITECTURE.md` to replace the stale Bolt-era stack description with the current Clerk/Neon/R2 stack, the two-role RLS model (`neondb_owner` vs `app_user`), and split the schema section into live-now vs. planned tables.
+- Flagged that the running app's `/properties` UI and dashboard KPIs render hardcoded mock data, not live queries — logged as an open item, tied explicitly to Epic 2's acceptance criteria so it isn't lost.
+- **Next:** write the automated cross-org/cross-role RLS test suite (now unblocked — `app_user` has a real password), then Sign In/Sign Up pages, then the Clerk `user.created` webhook.
 
 ### 2026-09-21
 - Added `current_app_role()`; replaced `properties_isolation`, `units_isolation`, and `tenants_isolation` with role-aware `using` and `with check` clauses that exclude the `tenant` role.
