@@ -15,7 +15,7 @@ CESAR/CRM is a modular, multi-tenant property management platform serving proper
 
 ## 2. Key Decision Baked Into This PRD
 
-**Backend is a free-tier composed stack, not Supabase and not Bolt Database.** `ARCHITECTURE.md` in repo root still names Bolt Database throughout — that's stale, and so is any earlier reference to Supabase in this repo's docs. The confirmed stack, chosen entirely for zero recurring cost with no inactivity-pause risk:
+**Backend is a free-tier composed stack, not Supabase and not Bolt Database.** `docs/ARCHITECTURE.md` reflects this stack already — see there for the current schema and role model. The confirmed stack, chosen entirely for zero recurring cost with no inactivity-pause risk:
 
 | Concern | Provider | Notes |
 |---|---|---|
@@ -76,7 +76,7 @@ Schema/routes are otherwise unchanged from ARCHITECTURE.md's original data model
 
 **Scope**
 - **Known state as of EPIC 1:** existing `/properties` UI and dashboard KPI cards currently render hardcore mock data, not live queries - this epic's first acceptance criterion (live Neon counts, real queries) directly replaces that. Confirm `/tenants`, `/leases`, `/payments` for the same pattern before their owning epics begin. 
- 
+
 - Provision Neon project; confirm connection pooling setup (Neon's pooler vs. direct connection) for serverless/Vercel deployment
 - Recreate `users`, `organizations` tables in Neon; wire Clerk webhook (`user.created`) → create matching `users`/`organizations` rows, no orphaned Clerk users
 - Role model: `admin`, `manager`, `tenant` — stored on the `users` row, resolved via Clerk's session/JWT claims or a DB lookup keyed by `clerk_user_id`
