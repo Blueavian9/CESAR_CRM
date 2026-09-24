@@ -15,6 +15,9 @@
 - **Status:** Mid-Epic 1 (Foundation & Auth). Clerk installed and wired; Neon schema + RLS live and force-enforced; TypeScript build clean. Sign In/Sign Up UI and the Clerk `user.created` webhook not yet built.
 
 ## 2. Open Items
+
+- [ ] `ARCHITECTURE.md` in repo root is still Bolt-flavored — leave as-is until Epic 1 is functionally complete, then rewrite (see PRD §7).
+
 - [ ] Current UI (`/properties`, dashboard KPIs, likely `/tenants`, `/leases`, `/payments`) renders hardcoded mock arrays, not live data - confirmed via screenshot 2026-09-25. This is expected pre-Epic-2 scaffolding, not a regression, but must be swapped for real API-layer calls as part of Epic 2's acceptance criteria (already specified: "real queries through the API layer, not placeholders"). Do no build new features on top of the mock arrays - build against the real API client shape even if the backend isn't wired yet. 2026-09-24. 
 
 - [ ] Original 16-EPIC PRD still not located. Current `docs/PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
@@ -66,6 +69,12 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 ## 5. Last Session Log
 
 *(Most recent entry on top. One entry per session — a few lines is enough: what changed, what's next, any open decision.)*
+
+
+
+### 2026-09-24
+- Wrote and ran `scripts/test-rls-isolation.mjs` — automated cross-org/cross-role RLS isolation test, 12/12 assertions passing. Confirmed `grep -rE "bolt|supabase" src/` returns empty — AC#3 closed. Closes Epic 1 acceptance criteria #3 and #4.
+- **Next:** Sign In/Sign Up pages (Clerk prebuilt components), then the `user.created` webhook, to close AC#1 — the last gate on Epic 1.
 
 
 ### 2026-09-24
