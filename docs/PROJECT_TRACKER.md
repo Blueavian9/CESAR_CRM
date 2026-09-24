@@ -18,7 +18,6 @@
 - [ ] Current UI (`/properties`, dashboard KPIs, likely `/tenants`, `/leases`, `/payments`) renders hardcoded mock arrays, not live data - confirmed via screenshot 2026-09-25. This is expected pre-Epic-2 scaffolding, not a regression, but must be swapped for real API-layer calls as part of Epic 2's acceptance criteria (already specified: "real queries through the API layer, not placeholders"). Do no build new features on top of the mock arrays - build against the real API client shape even if the backend isn't wired yet. 2026-09-24. 
 
 - [ ] Original 16-EPIC PRD still not located. Current `docs/PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
-- [ ] `ARCHITECTURE.md` in repo root is still Bolt-flavored — leave as-is until Epic 1 is functionally complete, then rewrite (see PRD §7).
 
 - [ ] Minor: `tsconfig.app.json` has a deprecated-`baseUrl` warning (TS 6/7). Fix is to delete the `"baseUrl": "."` line — `paths` already resolves relative to the tsconfig file under `moduleResolution: "bundler"`, so nothing depends on it. Not blocking, low priority.
 
@@ -27,6 +26,9 @@
 Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This section tracks completion only — don't duplicate the criteria text here, just check items off as the PRD's stated criteria are met.
 
 - [ ] **Epic 1 — Foundation & Auth (Clerk + Neon migration)**
+
+  - [x] Automated cross-org/cross-role RLS isolation test suite (`scripts/test-rls-isolation.mjs`) - 12/12 assertions passing 
+
   - [x] Neon project provisioned/confirmed
   - [ ] `users`/`organizations` tables + Auth signup wiring
   - [x] Role model (`admin`/`manager`/`tenant`) enforced via RLS
@@ -64,6 +66,17 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 ## 5. Last Session Log
 
 *(Most recent entry on top. One entry per session — a few lines is enough: what changed, what's next, any open decision.)*
+
+
+### 2026-09-24
+- Wrote and ran `scripts/test-rls-isolation.mjs` — automated cross-org/cross-role RLS isolation test, 12/12 assertions passing (positive control, cross-org block, tenant-role block on properties/units/tenants, org-scoped-not-tenant-blocked on organizations/users). Closes Epic 1 acceptance criterion #4.
+- **Next:** run `grep -rE "bolt|supabase" src/` to confirm AC #3, then Sign In/Sign Up pages (Clerk prebuilt components), then the `user.created` webhook.
+
+
+### 2026-09-24
+- Wrote and ran `scripts/test-rls-isolation.mjs` — automated cross-org/cross-role RLS isolation test, 12/12 assertions passing (positive control, cross-org block, tenant-role block on properties/units/tenants, org-scoped-not-tenant-blocked on organizations/users). Closes Epic 1 acceptance criterion #4.
+- **Next:** run `grep -rE "bolt|supabase" src/` to confirm AC #3, then Sign In/Sign Up pages (Clerk prebuilt components), then the `user.created` webhook.
+
 
 
 ### 2026-09-20
