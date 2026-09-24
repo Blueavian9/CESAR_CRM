@@ -16,8 +16,6 @@
 
 ## 2. Open Items
 
-- [ ] `ARCHITECTURE.md` in repo root is still Bolt-flavored — leave as-is until Epic 1 is functionally complete, then rewrite (see PRD §7).
-
 - [ ] Current UI (`/properties`, dashboard KPIs, likely `/tenants`, `/leases`, `/payments`) renders hardcoded mock arrays, not live data - confirmed via screenshot 2026-09-25. This is expected pre-Epic-2 scaffolding, not a regression, but must be swapped for real API-layer calls as part of Epic 2's acceptance criteria (already specified: "real queries through the API layer, not placeholders"). Do no build new features on top of the mock arrays - build against the real API client shape even if the backend isn't wired yet. 2026-09-24. 
 
 - [ ] Original 16-EPIC PRD still not located. Current `docs/PRD.md` is a reconstruction; treat as authoritative unless the original turns up and conflicts.
@@ -70,7 +68,11 @@ Full scope and acceptance criteria for each epic are in `docs/PRD.md` §6. This 
 
 *(Most recent entry on top. One entry per session — a few lines is enough: what changed, what's next, any open decision.)*
 
-
+### 2026-09-24 (cont'd)
+- Security incident: Neon credentials (neondb_owner and app_user passwords) were accidentally pasted in plaintext during an unrelated research question. Both rotated immediately via Neon Console's Reset Password flow; re-ran scripts/test-rls-isolation.mjs after each rotation to confirm connectivity — 12/12 passing both times.
+- Confirmed no Clerk secret key exists yet (frontend-only Clerk usage so far via @clerk/clerk-react); confirmed VITE_CLERK_PUBLISHABLE_KEY is not sensitive (baked into the client bundle by design, Clerk's intended behavior).
+- Installed `svix` (needed to verify Clerk webhook signatures for the upcoming user.created webhook). npm flagged 3 vulnerabilities (2 moderate, 1 high) on install — under review, not yet fixed.
+- **Next:** review npm audit output before deciding whether to run npm audit fix; confirm CLERK_SECRET_KEY added to .env; then create the Clerk webhook endpoint (generates CLERK_WEBHOOK_SECRET) and build the user.created handler.
 
 ### 2026-09-24
 - Wrote and ran `scripts/test-rls-isolation.mjs` — automated cross-org/cross-role RLS isolation test, 12/12 assertions passing. Confirmed `grep -rE "bolt|supabase" src/` returns empty — AC#3 closed. Closes Epic 1 acceptance criteria #3 and #4.
