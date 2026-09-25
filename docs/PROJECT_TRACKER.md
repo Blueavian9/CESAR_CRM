@@ -15,6 +15,7 @@
 - **Status:** Mid-Epic 1 (Foundation & Auth). Clerk installed and wired; Neon schema + RLS live and force-enforced; TypeScript build clean. Sign In/Sign Up UI and the Clerk `user.created` webhook not yet built.
 
 ## 2. Open Items
+- [x] npm audit vulnerabilities from svix install (2 moderate, 1 high) resolved via `npm audit fix` — 0 vulnerabilities remaining, confirmed via clean tsc build + passing RLS suite.
 
 - [ ] Current UI (`/properties`, dashboard KPIs, likely `/tenants`, `/leases`, `/payments`) renders hardcoded mock arrays, not live data - confirmed via screenshot 2026-09-25. This is expected pre-Epic-2 scaffolding, not a regression, but must be swapped for real API-layer calls as part of Epic 2's acceptance criteria (already specified: "real queries through the API layer, not placeholders"). Do no build new features on top of the mock arrays - build against the real API client shape even if the backend isn't wired yet. 2026-09-24. 
 
